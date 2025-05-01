@@ -39,7 +39,6 @@ export function HabitListItem({
       {/* Habit Data for Each Day */}
       {dates.map((date) => (
         <div key={date} className="flex flex-col items-center">
-          <span className="text-xs text-muted-foreground">{date}</span>
           <Button
             onClick={() =>
               updateCompletion(
