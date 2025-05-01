@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { HabitListItem } from "./HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
+import { ScrollArea } from "./ui/scroll-area";
 
 function HabitTracker() {
   const { habits, addHabit, updateCompletion } = useHabits();
@@ -104,15 +105,20 @@ function HabitTracker() {
           </SheetContent>
         </Sheet>
       </header>
-<div  className="p-4 max-w-4xl mx-auto">
-
-      {/* Habit List */}
-      <ul className="space-y-4">
-        {habits.map((habit) => (
-          <HabitListItem key={habit.id} habit={habit} today={today} updateCompletion={updateCompletion} />
-        ))}
-      </ul>
-        </div>
+      <div className="p-4 max-w-4xl mx-auto">
+  <ScrollArea>
+    <ul className="space-y-4">
+      {habits.map((habit) => (
+        <HabitListItem
+          key={habit.id}
+          habit={habit}
+          today={today}
+          updateCompletion={updateCompletion}
+        />
+      ))}
+    </ul>
+  </ScrollArea>
+</div>
     </div>
   );
 }
