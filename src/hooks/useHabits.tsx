@@ -67,7 +67,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
               ...habit,
               history: {
                 ...habit.history,
-                [date]: (habit.history[date] || 0) + value,
+                [date]: value,
               },
             }
           : habit
