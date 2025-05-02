@@ -1,6 +1,6 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
@@ -37,67 +37,72 @@ export function HabitListItem({
   };
 
   return (
-    <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b py-2">
-      {/* Habit Details */}
-      <div className="flex flex-col">
-        <h3 className="text-lg font-semibold">{habit.name}</h3>
-        <p className="text-sm text-muted-foreground">{habit.description}</p>
-        {habit.type === "measurable" && (
-          <p className="text-sm">
-            Target: {habit.target} {habit.unit}
-          </p>
-        )}
+    <div>
+      {/* Habit Row */}
+      <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b py-2">
+        {/* Habit Details */}
+        <div className="flex flex-col">
+          <h3 className="text-lg font-semibold">{habit.name}</h3>
+          <p className="text-sm text-muted-foreground">{habit.description}</p>
+          {habit.type === "measurable" && (
+            <p className="text-sm">
+              Target: {habit.target} {habit.unit}
+            </p>
+          )}
+        </div>
+
+        {/* Habit Data for Each Day */}
+        {dates.map((date) => (
+          <div key={date} className="flex flex-col items-center">
+            <Button
+              onClick={() => {
+                setSelectedDate(date);
+                setNumericValue(habit.history[date] || 0);
+              }}
+              variant={habit.history[date] ? "secondary" : "default"}
+              className="mt-1"
+            >
+              {habit.type === "boolean"
+                ? habit.history[date]
+                  ? "✔"
+                  : "✖"
+                : habit.history[date] || 0}
+            </Button>
+          </div>
+        ))}
       </div>
 
-      {/* Habit Data for Each Day */}
-      {dates.map((date) => (
-        <div key={date} className="flex flex-col items-center">
-          <Dialog>
-            <DialogTrigger asChild>
+      {/* Dialog for Updating Habit */}
+      {selectedDate && (
+        <Dialog open={!!selectedDate} onOpenChange={() => setSelectedDate(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Update Habit</DialogTitle>
+            </DialogHeader>
+            {habit.type === "boolean" ? (
               <Button
                 onClick={() => {
-                  setSelectedDate(date);
-                  setNumericValue(habit.history[date] || 0);
+                  updateCompletion(habit.id, selectedDate, habit.history[selectedDate] ? 0 : 1);
+                  setSelectedDate(null); // Close the dialog
                 }}
-                variant={habit.history[date] ? "secondary" : "default"}
-                className="mt-1"
+                variant={habit.history[selectedDate] ? "secondary" : "default"}
               >
-                {habit.type === "boolean"
-                  ? habit.history[date]
-                    ? "✔"
-                    : "✖"
-                  : habit.history[date] || 0}
+                {habit.history[selectedDate] ? "Mark as Incomplete" : "Mark as Complete"}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Update Habit</DialogTitle>
-              </DialogHeader>
-              {habit.type === "boolean" ? (
-                <Button
-                  onClick={() => {
-                    updateCompletion(habit.id, date, habit.history[date] ? 0 : 1);
-                    setSelectedDate(null); // Close the dialog
-                  }}
-                  variant={habit.history[date] ? "secondary" : "default"}
-                >
-                  {habit.history[date] ? "Mark as Incomplete" : "Mark as Complete"}
-                </Button>
-              ) : (
-                <div className="space-y-4">
-                  <label className="block text-sm font-medium">Value</label>
-                  <Input
-                    type="number"
-                    value={numericValue}
-                    onChange={(e) => setNumericValue(parseInt(e.target.value, 10))}
-                  />
-                  <Button onClick={handleSave}>Save</Button>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
-      ))}
+            ) : (
+              <div className="space-y-4">
+                <label className="block text-sm font-medium">Value</label>
+                <Input
+                  type="number"
+                  value={numericValue}
+                  onChange={(e) => setNumericValue(parseInt(e.target.value, 10))}
+                />
+                <Button onClick={handleSave}>Save</Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
