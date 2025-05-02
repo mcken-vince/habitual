@@ -1,5 +1,8 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export function HabitListItem({
   habit,
@@ -10,6 +13,9 @@ export function HabitListItem({
   today: string;
   updateCompletion: (habitId: string, date: string, value: number) => void;
 }) {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [numericValue, setNumericValue] = useState<number>(0);
+
   // Generate an array of dates starting from today and going back 6 days
   const generateDates = (startDate: string, days: number) => {
     const dates = [];
@@ -22,6 +28,13 @@ export function HabitListItem({
   };
 
   const dates = generateDates(today, 7); // Generate 7 days of data (including today)
+
+  const handleSave = () => {
+    if (selectedDate) {
+      updateCompletion(habit.id, selectedDate, numericValue);
+      setSelectedDate(null); // Close the dialog
+    }
+  };
 
   return (
     <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b py-2">
@@ -39,23 +52,50 @@ export function HabitListItem({
       {/* Habit Data for Each Day */}
       {dates.map((date) => (
         <div key={date} className="flex flex-col items-center">
-          <Button
-            onClick={() =>
-              updateCompletion(
-                habit.id,
-                date,
-                habit.type === "boolean" ? 1 : 0
-              )
-            }
-            variant={habit.history[date] ? "secondary" : "default"}
-            className="mt-1"
-          >
-            {habit.type === "boolean"
-              ? habit.history[date]
-                ? "✔"
-                : "✖"
-              : habit.history[date] || 0}
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  setSelectedDate(date);
+                  setNumericValue(habit.history[date] || 0);
+                }}
+                variant={habit.history[date] ? "secondary" : "default"}
+                className="mt-1"
+              >
+                {habit.type === "boolean"
+                  ? habit.history[date]
+                    ? "✔"
+                    : "✖"
+                  : habit.history[date] || 0}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Update Habit</DialogTitle>
+              </DialogHeader>
+              {habit.type === "boolean" ? (
+                <Button
+                  onClick={() => {
+                    updateCompletion(habit.id, date, habit.history[date] ? 0 : 1);
+                    setSelectedDate(null); // Close the dialog
+                  }}
+                  variant={habit.history[date] ? "secondary" : "default"}
+                >
+                  {habit.history[date] ? "Mark as Incomplete" : "Mark as Complete"}
+                </Button>
+              ) : (
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium">Value</label>
+                  <Input
+                    type="number"
+                    value={numericValue}
+                    onChange={(e) => setNumericValue(parseInt(e.target.value, 10))}
+                  />
+                  <Button onClick={handleSave}>Save</Button>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
       ))}
     </div>
