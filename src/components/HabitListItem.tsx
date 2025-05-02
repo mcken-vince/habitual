@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { HabitDateCell } from "./HabitDateCell";
 
 export function HabitListItem({
   habit,
@@ -53,22 +54,10 @@ export function HabitListItem({
 
         {/* Habit Data for Each Day */}
         {dates.map((date) => (
-          <div key={date} className="flex flex-col items-center">
-            <Button
-              onClick={() => {
-                setSelectedDate(date);
-                setNumericValue(habit.history[date] || 0);
-              }}
-              variant={habit.history[date] ? "secondary" : "default"}
-              className="mt-1"
-            >
-              {habit.type === "boolean"
-                ? habit.history[date]
-                  ? "✔"
-                  : "✖"
-                : habit.history[date] || 0}
-            </Button>
-          </div>
+          <HabitDateCell habit={habit} date={date} onClick={() => {
+              setSelectedDate(date);
+              setNumericValue(habit.history[date] || 0);
+          }}/>
         ))}
       </div>
 
