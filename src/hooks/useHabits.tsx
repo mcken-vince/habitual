@@ -20,19 +20,27 @@ export const useHabits = () => {
 };
 
 export const HabitsProvider = ({ children }: { children: ReactNode }) => {
-  const [habits, setHabits] = useState<Habit[]>([]);
-
-  // Load habits from localStorage on app initialization
-  useEffect(() => {
-    const savedHabits = localStorage.getItem('habits');
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    // Initialize habits from localStorage
+    const savedHabits = localStorage.getItem("habits");
     if (savedHabits) {
-      setHabits(JSON.parse(savedHabits));
+      try {
+        return JSON.parse(savedHabits) as Habit[];
+      } catch (error) {
+        console.error("Failed to parse habits from localStorage:", error);
+        return [];
+      }
     }
-  }, []);
+    return [];
+  });
 
   // Save habits to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('habits', JSON.stringify(habits));
+    try {
+      localStorage.setItem("habits", JSON.stringify(habits));
+    } catch (error) {
+      console.error("Failed to save habits to localStorage:", error);
+    }
   }, [habits]);
 
   const addHabit = (habit: Habit) => {
@@ -52,23 +60,25 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateCompletion = (habitId: string, date: string, value: number) => {
-      setHabits((prevHabits) =>
-        prevHabits.map((habit) =>
-          habit.id === habitId
-            ? {
-                ...habit,
-                history: {
-                  ...habit.history,
-                  [date]: (habit.history[date] || 0) + value,
-                },
-              }
-            : habit
-        )
-      );
-    };
+    setHabits((prevHabits) =>
+      prevHabits.map((habit) =>
+        habit.id === habitId
+          ? {
+              ...habit,
+              history: {
+                ...habit.history,
+                [date]: (habit.history[date] || 0) + value,
+              },
+            }
+          : habit
+      )
+    );
+  };
 
   return (
-    <HabitsContext.Provider value={{ habits, addHabit, updateHabit, deleteHabit, updateCompletion }}>
+    <HabitsContext.Provider
+      value={{ habits, addHabit, updateHabit, deleteHabit, updateCompletion }}
+    >
       {children}
     </HabitsContext.Provider>
   );
