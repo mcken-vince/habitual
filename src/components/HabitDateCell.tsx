@@ -13,9 +13,10 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
 
   return (
     <div key={date} className="flex flex-col items-center">
-      <span
+      <Button
+        
         onClick={onClick}
-        // variant="ghost"
+        variant="ghost"
         className="w-12 h-12 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit"
       >
         {habit.type === "boolean" ? (
@@ -30,7 +31,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
             )}
           </div>
         )}
-      </span>
+      </Button>
     </div>
   );
 };
