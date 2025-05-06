@@ -9,10 +9,11 @@ export function HabitListItem({
   habit,
   today,
   updateCompletion,
+  onClick,
 }: {
   habit: Habit;
   today: string;
-  updateCompletion: (habitId: string, date: string, value: number) => void;
+  updateCompletion: (habitId: string, date: string, value: number) => void; onClick: () => void
 }) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [numericValue, setNumericValue] = useState<number>(0);
@@ -42,7 +43,7 @@ export function HabitListItem({
       {/* Habit Row */}
       <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b py-2">
         {/* Habit Details */}
-        <div className="flex flex-col">
+        <div className="flex flex-col" onClick={onClick}>
           <h3 className="text-lg font-semibold">{habit.name}</h3>
           <p className="text-sm text-muted-foreground">{habit.description}</p>
           {habit.type === "measurable" && (
