@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { HabitListItem } from "./HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
+import { HabitView } from "./HabitView";
 
 function HabitTracker() {
   const { habits, addHabit, updateCompletion } = useHabits();
+  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [newHabit, setNewHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; target: number; unit: string; description: string }>({
     name: "",
     description: "",
@@ -44,7 +46,23 @@ function HabitTracker() {
   
     const dates = generateDates(today, 7); // Generate 7 days of data (including today)
   
-  
+  const openHabitView = (habit: Habit) => {
+    setSelectedHabit(habit);
+  }
+
+  if (selectedHabit) {
+    return (
+      <HabitView
+        habit={selectedHabit}
+        isOpen={!!selectedHabit}
+        onClose={() => setSelectedHabit(null)}
+        onUpdateHabit={(id, updatedHabit) => {
+          // Update the habit in the list (this should be handled in your state management)
+          setSelectedHabit((prev) => (prev ? { ...prev, ...updatedHabit } : null));
+        }}
+      />
+    )
+  }
 
   return (
     <div className="w-full">
@@ -138,9 +156,10 @@ function HabitTracker() {
             habit={habit}
             today={today}
             updateCompletion={updateCompletion}
+            onClick={() => openHabitView(habit)}
           />
         ))}
-      </div>
+      </div> 
     </div>
   );
 }
