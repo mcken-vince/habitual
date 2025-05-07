@@ -33,19 +33,19 @@ function HabitTracker() {
 
   const today = new Date().toISOString().split("T")[0];
 
-    // Generate an array of dates starting from today and going back 6 days
-    const generateDates = (startDate: string, days: number) => {
-      const dates = [];
-      const currentDate = new Date(startDate);
-      for (let i = 0; i < days; i++) {
-        dates.push(currentDate.toISOString().split("T")[0]);
-        currentDate.setDate(currentDate.getDate() - 1);
-      }
-      return dates;
-    };
-  
-    const dates = generateDates(today, 7); // Generate 7 days of data (including today)
-  
+  // Generate an array of dates starting from today and going back 6 days
+  const generateDates = (startDate: string, days: number) => {
+    const dates = [];
+    const currentDate = new Date(startDate);
+    for (let i = 0; i < days; i++) {
+      dates.push(currentDate.toISOString().split("T")[0]);
+      currentDate.setDate(currentDate.getDate() - 1);
+    }
+    return dates;
+  };
+
+  const dates = generateDates(today, 5); // Generate 5 days of data (including today)
+
   const openHabitView = (habit: Habit) => {
     setSelectedHabit(habit);
   }
@@ -66,7 +66,7 @@ function HabitTracker() {
 
   return (
     <div className="w-full">
-    {/* Header */}
+      {/* Header */}
       <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm">
         <h1 className="text-2xl font-bold">Habitual</h1>
         <Sheet open={habitFormOpen} onOpenChange={() => {
@@ -138,18 +138,21 @@ function HabitTracker() {
         </Sheet>
       </header>
 
-        {/* Headers */}
-        <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b pb-2">
-        <div></div>
-        {dates.map((date) => (
-          <div key={date} className="text-center text-sm font-medium">
-            {new Date(date).toLocaleDateString("en-US", {
-              weekday: "short", day: "2-digit"})}
-          </div>
-        ))}
+      {/* Headers */}
+      <div className="flex flex-row gap-2 border-b pb-2">
+        <div className="flex flex-grow-1 min-w-30 p-2"></div>
+        <div className="grid grid-cols-[repeat(5,1fr)] items-center">
+          {dates.map((date) => (
+            <div key={date} className="flex align-center justify-center w-10">
+              <div className="max-w-8 text-center text-sm font-medium">{new Date(date).toLocaleDateString("en-US", {
+                weekday: "short", day: "2-digit", 
+              }).split(" ").reverse().join(" ")}</div>
+            </div>
+          ))}
+        </div>
       </div>
-       {/* Habit List */}
-       <div>
+      {/* Habit List */}
+      <div>
         {habits.map((habit) => (
           <HabitListItem
             key={habit.id}
@@ -159,7 +162,7 @@ function HabitTracker() {
             onClick={() => openHabitView(habit)}
           />
         ))}
-      </div> 
+      </div>
     </div>
   );
 }
