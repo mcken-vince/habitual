@@ -17,7 +17,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
         
         onClick={onClick}
         variant="ghost"
-        className="w-12 h-12 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit"
+        className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit"
       >
         {habit.type === "boolean" ? (
           <span className={`text-2xl font-bold ${textColorClass}`}>
