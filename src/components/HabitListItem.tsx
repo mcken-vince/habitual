@@ -29,7 +29,7 @@ export function HabitListItem({
     return dates;
   };
 
-  const dates = generateDates(today, 7); // Generate 7 days of data (including today)
+  const dates = generateDates(today, 5); // Generate 5 days of data (including today)
 
   const handleSave = () => {
     if (selectedDate) {
@@ -41,25 +41,21 @@ export function HabitListItem({
   return (
     <div>
       {/* Habit Row */}
-      <div className="grid grid-cols-[200px_repeat(7,1fr)] items-center gap-4 border-b py-2">
+      <div className="flex flex-row items-center gap-2 border-b py-2">
         {/* Habit Details */}
-        <div className="flex flex-col" onClick={onClick}>
-          <h3 className="text-lg font-semibold">{habit.name}</h3>
-          <p className="text-sm text-muted-foreground">{habit.description}</p>
-          {habit.type === "measurable" && (
-            <p className="text-sm">
-              Target: {habit.target} {habit.unit}
-            </p>
-          )}
+        <div className="p-2 min-w-30 flex flex-grow-1" onClick={onClick}>
+          <h3 className="text-md font-semibold">{habit.name}</h3>
         </div>
+        <div className="grid grid-cols-[repeat(5,1fr)]">
 
-        {/* Habit Data for Each Day */}
-        {dates.map((date) => (
-          <HabitDateCell habit={habit} date={date} onClick={() => {
+          {/* Habit Data for Each Day */}
+          {dates.map((date) => (
+            <HabitDateCell habit={habit} date={date} onClick={() => {
               setSelectedDate(date);
               setNumericValue(habit.history[date] || 0);
-          }}/>
-        ))}
+            }} />
+          ))}
+        </div>
       </div>
 
       {/* Dialog for Updating Habit */}
