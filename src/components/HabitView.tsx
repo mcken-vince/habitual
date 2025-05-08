@@ -1,10 +1,10 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { EditIcon } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
+import { HabitForm } from "./HabitForm";
 
 interface HabitViewProps {
   habit: Habit;
@@ -15,12 +15,6 @@ interface HabitViewProps {
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedHabit, setEditedHabit] = useState(habit);
-
-  const handleSave = () => {
-    onUpdateHabit(habit.id, editedHabit);
-    setIsEditing(false);
-  };
 
   // Generate a complete list of dates (e.g., last 30 days)
   const generateDates = (days: number) => {
@@ -50,7 +44,16 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
           <SheetClose />
         </SheetHeader>
         <div className="space-y-4">
-          {!isEditing ? (
+          {isEditing ? (
+            <HabitForm
+              initialHabit={habit}
+              onSave={(updatedHabit) => {
+                onUpdateHabit(habit.id, updatedHabit);
+                setIsEditing(false);
+              }}
+              onCancel={() => setIsEditing(false)}
+            />
+          ) : (
             <>
               <div>
                 <p className="text-sm font-medium">Name:</p>
@@ -60,6 +63,18 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                 <p className="text-sm font-medium">Description:</p>
                 <p>{habit.description}</p>
               </div>
+              {habit.type === "boolean" && habit.frequencyTimes && habit.frequencyDays && (
+                <div>
+                  <p className="text-sm font-medium">Frequency:</p>
+                  <p>{habit.frequencyTimes} times every {habit.frequencyDays} days</p>
+                </div>
+              )}
+              {habit.type === "measurable" && habit.frequencyDays && (
+                <div>
+                  <p className="text-sm font-medium">Frequency:</p>
+                  <p>{habit.target} {habit.unit} every {habit.frequencyDays} days</p>
+                </div>
+              )}
               {habit.type === "measurable" && (
                 <>
                   <div>
@@ -75,50 +90,6 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   <HabitHeatmap habit={habit} dates={allDates} />
                 </>
               )}
-            </>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <Input
-                  value={editedHabit.name}
-                  onChange={(e) => setEditedHabit({ ...editedHabit, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <Input
-                  value={editedHabit.description}
-                  onChange={(e) => setEditedHabit({ ...editedHabit, description: e.target.value })}
-                />
-              </div>
-              {habit.type === "measurable" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Target</label>
-                    <Input
-                      type="number"
-                      value={editedHabit.target || ""}
-                      onChange={(e) =>
-                        setEditedHabit({ ...editedHabit, target: parseInt(e.target.value, 10) })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Unit</label>
-                    <Input
-                      value={editedHabit.unit || ""}
-                      onChange={(e) => setEditedHabit({ ...editedHabit, unit: e.target.value })}
-                    />
-                  </div>
-                </>
-              )}
-              <div className="mt-4 flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSave}>Save</Button>
-              </div>
             </>
           )}
         </div>
