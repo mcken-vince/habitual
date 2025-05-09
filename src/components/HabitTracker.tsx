@@ -39,6 +39,8 @@ function HabitTracker() {
         onClose={() => setSelectedHabit(null)}
         onUpdateHabit={(id, updatedHabit) => {
           // Update the habit in the list (this should be handled in your state management)
+          // Add and call updateHabit function from useHabits hook
+          
           setSelectedHabit((prev) => (prev ? { ...prev, ...updatedHabit } : null));
         }}
       />
@@ -64,6 +66,7 @@ function HabitTracker() {
                   id: Date.now().toString(),
                   ...habit,
                   history: {},
+                  createdAt: new Date().toISOString(),
                 });
                 setHabitFormOpen(false);
               }}
