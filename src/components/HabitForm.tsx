@@ -12,7 +12,7 @@ interface HabitFormProps {
 
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
   const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; color: string; }>(
-    initialHabit ? {color: "#000000", ...initialHabit} : { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined, color: "#000000" }
+    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined, color: "#000000" }
   );
 
   const handleSave = () => {
