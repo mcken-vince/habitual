@@ -5,14 +5,14 @@ import { Habit } from "@/types";
 import { useState } from "react";
 
 interface HabitFormProps {
-  initialHabit?: Partial<Habit> & { name: string; type: "boolean" | "measurable" };
-  onSave: (habit: Partial<Habit> & { name: string; type: "boolean" | "measurable" }) => void;
+  initialHabit?: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; };
+  onSave: (habit: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; }) => void;
   onCancel: () => void;
 }
 
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
-  const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable" }>(
-    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined }
+  const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; color: string; }>(
+    initialHabit ? {color: "#000000", ...initialHabit} : { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined, color: "#000000" }
   );
 
   const handleSave = () => {
@@ -54,6 +54,21 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           </SelectContent>
         </Select>
       </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">Color</label>
+        <Input
+          type="color"
+          value={habit.color || "#000000"} // Default to black if no color is set
+          onChange={(e) =>
+            setHabit((prev) => ({
+              ...prev,
+              color: e.target.value,
+            }))
+          }
+        />
+      </div>
+
       {habit.type === "boolean" && (
         <>
           <div>
