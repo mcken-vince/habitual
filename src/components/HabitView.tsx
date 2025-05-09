@@ -12,22 +12,18 @@ interface HabitViewProps {
   onClose: () => void;
   onUpdateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
 }
+import { calculateHabitScore } from "@/lib/scoring";
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  // Generate a complete list of dates (e.g., last 30 days)
-  const generateDates = (days: number) => {
-    const dates = [];
-    const currentDate = new Date();
-    for (let i = 0; i < days; i++) {
-      dates.push(currentDate.toISOString().split("T")[0]);
-      currentDate.setDate(currentDate.getDate() - 1);
-    }
-    return dates.reverse(); // Ensure chronological order
-  };
+  const allDates = Array.from({ length: 30 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    return date.toISOString().split("T")[0];
+  }).reverse();
 
-  const allDates = generateDates(30); // Generate the last 30 days
+  const score = calculateHabitScore(habit); // Calculate the score
 
   return (
     <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
@@ -56,8 +52,8 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
           ) : (
             <>
               <div>
-                <p className="text-sm font-medium">Name:</p>
-                <p>{habit.name}</p>
+                <p className="text-sm font-medium">Score:</p>
+                <p>{score.toFixed(1)}%</p>
               </div>
               <div>
                 <p className="text-sm font-medium">Description:</p>
@@ -87,7 +83,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   </div>
 
                   {/* Pass all dates to the HabitHeatmap */}
-                  <HabitHeatmap habit={habit} dates={allDates} />
+              <HabitHeatmap habit={habit} dates={allDates} />
                 </>
               )}
             </>
