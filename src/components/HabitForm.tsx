@@ -3,6 +3,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Habit } from "@/types";
 import { useState } from "react";
+import { ColorSelect } from "./ColorSelect";
 
 interface HabitFormProps {
   initialHabit?: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; };
@@ -57,13 +58,12 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
 
       <div>
         <label className="block text-sm font-medium mb-1">Color</label>
-        <Input
-          type="color"
-          value={habit.color || "#000000"} // Default to black if no color is set
-          onChange={(e) =>
+        <ColorSelect
+          color={habit.color}
+          onChange={(value) =>
             setHabit((prev) => ({
               ...prev,
-              color: e.target.value,
+              color: value,
             }))
           }
         />
