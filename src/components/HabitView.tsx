@@ -13,6 +13,7 @@ interface HabitViewProps {
   onUpdateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
 }
 import { calculateHabitScore } from "@/lib/scoring";
+import { InteractiveLineChart } from "./InteractiveLineChart";
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -25,6 +26,13 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
 
   const score = calculateHabitScore(habit); // Calculate the score
 
+const formattedHistory = allDates.map((date) => {
+  const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
+  return {
+    date,
+    value,
+  };
+})
   return (
     <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-full w-full p-4">
@@ -82,8 +90,9 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                     <p>{habit.unit}</p>
                   </div>
 
+                  <InteractiveLineChart data={formattedHistory} color={habit.color} />
                   {/* Pass all dates to the HabitHeatmap */}
-              <HabitHeatmap habit={habit} dates={allDates} />
+                  <HabitHeatmap habit={habit} dates={allDates} />
                 </>
               )}
             </>
