@@ -18,7 +18,6 @@ function HabitTracker() {
     const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef<number | null>(null);
 
-  const today = new Date().toISOString().split("T")[0];
 
   const openHabitView = (habit: Habit) => {
     setSelectedHabit(habit);
@@ -114,7 +113,6 @@ function HabitTracker() {
             key={habit.id}
             habit={habit}
             visibleDates={visibleDates}
-            today={today}
             updateCompletion={updateCompletion}
             onClick={() => openHabitView(habit)}
           />
