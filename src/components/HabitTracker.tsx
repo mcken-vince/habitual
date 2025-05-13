@@ -8,7 +8,7 @@ import { HabitView } from "./HabitView";
 import { HabitForm } from "./HabitForm";
 
 function HabitTracker() {
-  const { habits, addHabit, updateCompletion } = useHabits();
+  const { habits, addHabit, updateHabit, updateCompletion } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOpen, setHabitFormOpen] = useState(false);
 
@@ -38,9 +38,7 @@ function HabitTracker() {
         isOpen={!!selectedHabit}
         onClose={() => setSelectedHabit(null)}
         onUpdateHabit={(id, updatedHabit) => {
-          // Update the habit in the list (this should be handled in your state management)
-          // Add and call updateHabit function from useHabits hook
-          
+          updateHabit(id, updatedHabit);
           setSelectedHabit((prev) => (prev ? { ...prev, ...updatedHabit } : null));
         }}
       />
