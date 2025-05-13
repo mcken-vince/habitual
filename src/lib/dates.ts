@@ -1,10 +1,12 @@
-export function getDatesInRange(start: Date, end: Date): string[] {
+export function getDatesInRange(start: Date = new Date(), lengthDays: number, reverse?: boolean): string[] {
   const startDate = new Date(start);
-  const endDate = new Date(end);
-  const length = Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  return Array.from({ length }, (_, i) => {
+  const dates = Array.from({ length: lengthDays }, (_, i) => {
     const date = new Date();
     date.setDate(startDate.getDate() - i);
     return date.toISOString().split("T")[0];
-  }).reverse();
+  });
+  if (reverse) {
+    return dates.reverse();
+  }
+  return dates;
 }

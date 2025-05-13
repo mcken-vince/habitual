@@ -19,8 +19,7 @@ import { getDatesInRange } from "@/lib/dates";
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const oneYearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1)); // Get the date one year ago
-  const allDates = getDatesInRange(oneYearAgo, new Date()); // Get all dates in the last year
+  const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
 
   const score = calculateHabitScore(habit); // Calculate the score
 

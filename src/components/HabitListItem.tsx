@@ -7,25 +7,21 @@ import { HabitDateCell } from "./HabitDateCell";
 import { calculateHabitScore } from "@/lib/scoring";
 import { SimplePie } from "./SimplePie";
 
-export function HabitListItem({
-  habit,
-  today,
-  updateCompletion,
-  onClick,
-}: {
+interface HabitListItemProps {
   habit: Habit;
-  today: string;
   updateCompletion: (habitId: string, date: string, value: number) => void;
   onClick: () => void;
-}) {
+  visibleDates: string[];
+}
+
+export function HabitListItem({
+  habit,
+  updateCompletion,
+  onClick,
+  visibleDates,
+}: HabitListItemProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [numericValue, setNumericValue] = useState<number>(0);
-
-  const dates = Array.from({ length: 5 }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    return date.toISOString().split("T")[0];
-  });
 
   const handleSave = () => {
     if (selectedDate) {
@@ -44,7 +40,7 @@ export function HabitListItem({
           <h3 className="text-md font-semibold">{habit.name}</h3>
         </div>
         <div className="grid grid-cols-[repeat(5,1fr)]">
-          {dates.map((date) => (
+          {visibleDates.map((date) => (
             <HabitDateCell
               key={date}
               habit={habit}
