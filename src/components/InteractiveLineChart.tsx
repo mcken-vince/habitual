@@ -23,9 +23,6 @@ import {
 } from "@/components/ui/select";
 
 const chartConfig = {
-  date: {
-    label: "Date",
-  },
   value: {
     label: "Value",
   },
@@ -42,12 +39,7 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
   const filteredData = data.filter((item) => {
     const date = new Date(item.date);
     const referenceDate = new Date();
-    let daysToSubtract = 90;
-    if (timeRange === "30d") {
-      daysToSubtract = 30;
-    } else if (timeRange === "7d") {
-      daysToSubtract = 7;
-    }
+    const daysToSubtract = parseInt(timeRange.split('d')[0] || '0') || 90;
     const startDate = new Date(referenceDate);
     startDate.setDate(startDate.getDate() - daysToSubtract);
     return date >= startDate;
@@ -56,12 +48,6 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
   return (
     <Card>
       <CardHeader className="flex items-center gap-2 space-y-0 border-b sm:flex-row">
-        {/* <div className="grid flex-1 gap-1 text-center sm:text-left">
-          <CardTitle>Area Chart - Interactive</CardTitle>
-          <CardDescription>
-            Showing total visitors for the last 3 months
-          </CardDescription>
-        </div> */}
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
             className="w-[160px] rounded-lg sm:ml-auto"
@@ -70,6 +56,12 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
+            <SelectItem value="365d" className="rounded-lg">
+              Last year
+            </SelectItem>
+            <SelectItem value="182d" className="rounded-lg">
+              Last 6 months
+            </SelectItem>
             <SelectItem value="90d" className="rounded-lg">
               Last 3 months
             </SelectItem>
