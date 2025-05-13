@@ -33,7 +33,7 @@ const formattedHistory = allDates.map((date) => {
 })
   return (
     <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-full w-full p-4">
+      <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="flex flex-row items-center w-full justify-between">
             {habit.name}
