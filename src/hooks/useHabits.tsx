@@ -20,6 +20,7 @@ export const useHabits = () => {
 };
 
 export const HabitsProvider = ({ children }: { children: ReactNode }) => {
+  const [updateTrigger, setUpdateTrigger] = useState(0); // State to trigger updates
   const [habits, setHabits] = useState<Habit[]>(() => {
     // Initialize habits from localStorage
     const savedHabits = localStorage.getItem("habits");
@@ -41,10 +42,11 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Failed to save habits to localStorage:", error);
     }
-  }, [habits]);
+  }, [habits, updateTrigger]);
 
   const addHabit = (habit: Habit) => {
     setHabits((prevHabits) => [...prevHabits, habit]);
+    setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
   const updateHabit = (id: string, updatedHabit: Partial<Habit>) => {
@@ -53,10 +55,12 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
         habit.id === id ? { ...habit, ...updatedHabit } : habit
       )
     );
+    setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
   const deleteHabit = (id: string) => {
     setHabits((prevHabits) => prevHabits.filter((habit) => habit.id !== id));
+    setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
   const updateCompletion = (habitId: string, date: string, value: number) => {
@@ -73,6 +77,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
           : habit
       )
     );
+    setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
   return (
