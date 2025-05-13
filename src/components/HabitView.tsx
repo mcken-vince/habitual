@@ -14,15 +14,13 @@ interface HabitViewProps {
 }
 import { calculateHabitScore } from "@/lib/scoring";
 import { InteractiveLineChart } from "./InteractiveLineChart";
+import { getDatesInRange } from "@/lib/dates";
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const allDates = Array.from({ length: 30 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    return date.toISOString().split("T")[0];
-  }).reverse();
+  const oneYearAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1)); // Get the date one year ago
+  const allDates = getDatesInRange(oneYearAgo, new Date()); // Get all dates in the last year
 
   const score = calculateHabitScore(habit); // Calculate the score
 
@@ -90,11 +88,11 @@ const formattedHistory = allDates.map((date) => {
                     <p>{habit.unit}</p>
                   </div>
 
-                  <InteractiveLineChart data={formattedHistory} color={habit.color} />
-                  {/* Pass all dates to the HabitHeatmap */}
-                  <HabitHeatmap habit={habit} dates={allDates} />
                 </>
               )}
+              <InteractiveLineChart data={formattedHistory} color={habit.color} />
+              {/* Pass all dates to the HabitHeatmap */}
+              <HabitHeatmap habit={habit} dates={allDates} />
             </>
           )}
         </div>
