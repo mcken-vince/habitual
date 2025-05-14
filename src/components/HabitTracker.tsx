@@ -119,7 +119,9 @@ function HabitTracker() {
           </SheetContent>
         </Sheet>
       </header>
-
+{visibleDates.map((date) => (
+  <div key={date}>{date}</div>
+))}
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
@@ -127,9 +129,13 @@ function HabitTracker() {
           onTouchStart={handleTouchStart}>
           {visibleDates.map((date) => (
             <div key={date} className="flex align-center justify-center w-10">
-              <div className="max-w-8 text-center text-sm font-medium">{new Date(date).toLocaleDateString("en-US", {
-                weekday: "short", day: "2-digit", month: "short"
-              }).split(" ").reverse().join(" ")}</div>
+              <div className="max-w-8 text-center text-sm font-medium">{
+              // new Date(date).toLocaleDateString("en-CA", {
+              //   weekday: "short", day: "2-digit", month: "short"
+              // }).split(" ").reverse().join(" ")
+              new Date(date).toUTCString().split(" ").slice(0, 4).join(" ")
+              }
+              </div>
             </div>
           ))}
         </div>
