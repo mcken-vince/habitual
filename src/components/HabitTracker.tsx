@@ -43,10 +43,11 @@ function HabitTracker() {
     const dragDistance = clientX - dragStartX.current;
     if (Math.abs(dragDistance) > 50) {
       const direction = dragDistance < 0 ? -1 : 1;
-      const baseDate = new Date(visibleDates[0]);
+      // Parse as local date (YYYY-MM-DD)
+      const [year, month, day] = visibleDates[0].split('-').map(Number);
+      const baseDate = new Date(year, month - 1, day);
       const newStartDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
       newStartDate.setDate(newStartDate.getDate() + direction);
-
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const maxStartDate = new Date(today);
@@ -75,14 +76,14 @@ function HabitTracker() {
     setIsDragging(true);
     dragStartX.current = clientX;
   };
-  
-    const handleTouchStart = (event: React.TouchEvent) => {
-      startDrag(event.touches[0].clientX);
-    };
-  
-    const handleMouseDown = (event: React.MouseEvent) => {
-      startDrag(event.clientX);
-    };
+
+  const handleTouchStart = (event: React.TouchEvent) => {
+    startDrag(event.touches[0].clientX);
+  };
+
+  const handleMouseDown = (event: React.MouseEvent) => {
+    startDrag(event.clientX);
+  };
 
   const endDrag = () => {
     setIsDragging(false);
@@ -119,9 +120,9 @@ function HabitTracker() {
           </SheetContent>
         </Sheet>
       </header>
-{visibleDates.map((date) => (
-  <div key={date}>{date}</div>
-))}
+      {visibleDates.map((date) => (
+        <div key={date}>{date}</div>
+      ))}
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
@@ -130,10 +131,10 @@ function HabitTracker() {
           {visibleDates.map((date) => (
             <div key={date} className="flex align-center justify-center w-10">
               <div className="max-w-8 text-center text-sm font-medium">{
-              // new Date(date).toLocaleDateString("en-CA", {
-              //   weekday: "short", day: "2-digit", month: "short"
-              // }).split(" ").reverse().join(" ")
-              new Date(date).toUTCString().split(" ").slice(0, 4).join(" ")
+                // new Date(date).toLocaleDateString("en-CA", {
+                //   weekday: "short", day: "2-digit", month: "short"
+                // }).split(" ").reverse().join(" ")
+                new Date(date).toUTCString().split(" ").slice(0, 4).join(" ")
               }
               </div>
             </div>
