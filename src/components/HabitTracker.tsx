@@ -120,9 +120,6 @@ function HabitTracker() {
           </SheetContent>
         </Sheet>
       </header>
-      {visibleDates.map((date) => (
-        <div key={date}>{date}</div>
-      ))}
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
