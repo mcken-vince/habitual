@@ -73,7 +73,9 @@ const formattedHistory = allDates.map((date) => {
               {habit.type === "measurable" && habit.frequencyDays && (
                 <div>
                   <p className="text-sm font-medium">Frequency:</p>
-                  <p>{habit.target} {habit.unit} every {habit.frequencyDays} days</p>
+                  <p>
+                    {habit.target} {habit.unit} every {habit.frequencyDays} days
+                  </p>
                 </div>
               )}
               {habit.type === "measurable" && (
