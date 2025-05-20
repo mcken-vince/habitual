@@ -101,7 +101,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           </div>
         </>
       )}
-      {habit.type === "measurable" && (
+            {habit.type === "measurable" && (
         <>
           <div>
             <label className="block text-sm font-medium mb-1">Target</label>
@@ -123,6 +123,20 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
               value={habit.unit || ""}
               onChange={(e) => setHabit((prev) => ({ ...prev, unit: e.target.value }))}
               placeholder="Unit (e.g., km, minutes)"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Days</label>
+            <Input
+              type="number"
+              value={habit.frequencyDays || ""}
+              onChange={(e) =>
+                setHabit((prev) => ({
+                  ...prev,
+                  frequencyDays: parseInt(e.target.value, 10),
+                }))
+              }
+              placeholder="Number of days (e.g., 7 for weekly)"
             />
           </div>
         </>
