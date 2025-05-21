@@ -46,6 +46,11 @@ export function HabitListItem({
               habit={habit}
               date={date}
               onClick={() => {
+                if (habit.type === "boolean") {
+                  updateCompletion(habit.id, date, habit.history[date] ? 0 : 1);
+                  return;
+                }
+                
                 setSelectedDate(date);
                 setNumericValue(habit.history[date] || 0);
               }}
