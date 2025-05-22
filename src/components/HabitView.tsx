@@ -39,13 +39,14 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
   };
 });
 
-const formattedHistory = allDates.map((date) => {
-  const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
-  return {
-    date,
-    value,
-  };
-})
+// const formattedHistory = allDates.map((date) => {
+//   const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
+//   return {
+//     date,
+//     value,
+//   };
+// })
+
   return (
     <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto">
@@ -94,19 +95,7 @@ const formattedHistory = allDates.map((date) => {
                   </p>
                 </div>
               )}
-              {habit.type === "measurable" && (
-                <>
-                  <div>
-                    <p className="text-sm font-medium">Target:</p>
-                    <p>{habit.target}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Unit:</p>
-                    <p>{habit.unit}</p>
-                  </div>
-
-                </>
-              )}
+             
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
               {/* Pass all dates to the HabitHeatmap */}
               <HabitHeatmap habit={habit} dates={allDates} />
