@@ -22,6 +22,22 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
   const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
 
   const score = calculateHabitScore(habit); // Calculate the score
+  const scoreHistory = allDates.map((date, idx) => {
+  // Build a partial history up to and including this date
+  const partialHistory: typeof habit.history = {};
+  for (let i = 0; i <= idx; i++) {
+    const d = allDates[i];
+    if (habit.history[d] !== undefined) {
+      partialHistory[d] = habit.history[d];
+    }
+  }
+  // Calculate score for this day
+  const habitForDay = { ...habit, history: partialHistory };
+  return {
+    date,
+    value: calculateHabitScore(habitForDay),
+  };
+});
 
 const formattedHistory = allDates.map((date) => {
   const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
@@ -91,7 +107,7 @@ const formattedHistory = allDates.map((date) => {
 
                 </>
               )}
-              <InteractiveLineChart data={formattedHistory} color={habit.color} />
+              <InteractiveLineChart data={scoreHistory} color={habit.color} />
               {/* Pass all dates to the HabitHeatmap */}
               <HabitHeatmap habit={habit} dates={allDates} />
             </>
