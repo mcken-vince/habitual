@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Habit } from "@/types";
 import { useState } from "react";
 import { ColorSelect } from "./ColorSelect";
+import { FrequencyDialog } from "./FrequencyDialog";
 
 interface HabitFormProps {
   initialHabit?: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; };
@@ -11,10 +12,60 @@ interface HabitFormProps {
   onCancel: () => void;
 }
 
+type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
+
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
   const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; color: string; }>(
     initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined, color: "#000000" }
   );
+
+    // Helper to summarize frequency
+  function getFrequencySummary() {
+    if (habit.frequencyDays === 1 && habit.frequencyTimes === 1) return "Every day";
+    if (habit.frequencyDays && habit.frequencyTimes === 1) return `Every ${habit.frequencyDays} days`;
+    if (habit.frequencyDays === 7) return `${habit.frequencyTimes || 1} times per week`;
+    if (habit.frequencyDays === 30) return `${habit.frequencyTimes || 1} times per month`;
+    if (habit.frequencyDays && habit.frequencyTimes) return `${habit.frequencyTimes} times in ${habit.frequencyDays} days`;
+    return "Select frequency";
+  }
+
+  // Local state for dialog editing
+  const [frequencyDialogOpen, setFrequencyDialogOpen] = useState(false);
+
+  // Compute dialog initial values from habit
+  function getDialogFrequencyType(): FrequencyType {
+    if (habit.frequencyDays === 1 && habit.frequencyTimes === 1) return "everyDay";
+    if (habit.frequencyDays && habit.frequencyTimes === 1) return "everyXDays";
+    if (habit.frequencyDays === 7) return "timesPerWeek";
+    if (habit.frequencyDays === 30) return "timesPerMonth";
+    if (habit.frequencyDays && habit.frequencyTimes) return "timesInXDays";
+    return "everyDay";
+  }
+
+  function openFrequencyDialog() {
+    setFrequencyDialogOpen(true);
+  }
+
+  function handleFrequencyDialogSave(type: FrequencyType, days: number, times: number) {
+    let frequencyDays = 1, frequencyTimes = 1;
+    if (type === "everyDay") {
+      frequencyDays = 1; frequencyTimes = 1;
+    } else if (type === "everyXDays") {
+      frequencyDays = days; frequencyTimes = 1;
+    } else if (type === "timesPerWeek") {
+      frequencyDays = 7; frequencyTimes = times;
+    } else if (type === "timesPerMonth") {
+      frequencyDays = 30; frequencyTimes = times;
+    } else if (type === "timesInXDays") {
+      frequencyDays = days; frequencyTimes = times;
+    }
+    setHabit((prev) => ({
+      ...prev,
+      frequencyDays,
+      frequencyTimes,
+      frequencyType: type,
+    }));
+  }
 
   const handleSave = () => {
     if (habit.name.trim()) {
@@ -68,40 +119,25 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           }
         />
       </div>
-
       {habit.type === "boolean" && (
         <>
           <div>
-            <label className="block text-sm font-medium mb-1">Times</label>
-            <Input
-              type="number"
-              value={habit.frequencyTimes || ""}
-              onChange={(e) =>
-                setHabit((prev) => ({
-                  ...prev,
-                  frequencyTimes: parseInt(e.target.value, 10),
-                }))
-              }
-              placeholder="Number of times"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Days</label>
-            <Input
-              type="number"
-              value={habit.frequencyDays || ""}
-              onChange={(e) =>
-                setHabit((prev) => ({
-                  ...prev,
-                  frequencyDays: parseInt(e.target.value, 10),
-                }))
-              }
-              placeholder="Number of days"
+            <label className="block text-sm font-medium mb-1">Frequency</label>
+            <Button variant="outline" onClick={openFrequencyDialog}>
+              {getFrequencySummary()}
+            </Button>
+            <FrequencyDialog
+              open={frequencyDialogOpen}
+              onOpenChange={setFrequencyDialogOpen}
+              initialFrequencyType={getDialogFrequencyType()}
+              initialFrequencyDays={habit.frequencyDays || 7}
+              initialFrequencyTimes={habit.frequencyTimes || 1}
+              onSave={handleFrequencyDialogSave}
             />
           </div>
         </>
       )}
-            {habit.type === "measurable" && (
+      {habit.type === "measurable" && (
         <>
           <div>
             <label className="block text-sm font-medium mb-1">Target</label>
@@ -126,18 +162,38 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Days</label>
-            <Input
-              type="number"
-              value={habit.frequencyDays || ""}
-              onChange={(e) =>
+            <label className="block text-sm font-medium mb-1">Frequency</label>
+            <Select
+              value={
+                habit.frequencyDays === 1
+                  ? "daily"
+                  : habit.frequencyDays === 7
+                    ? "weekly"
+                    : habit.frequencyDays === 30
+                      ? "monthly"
+                      : ""
+              }
+              onValueChange={(value) => {
+                let days: number | undefined;
+                if (value === "daily") days = 1;
+                else if (value === "weekly") days = 7;
+                else if (value === "monthly") days = 30;
+                else days = undefined;
                 setHabit((prev) => ({
                   ...prev,
-                  frequencyDays: parseInt(e.target.value, 10),
-                }))
-              }
-              placeholder="Number of days (e.g., 7 for weekly)"
-            />
+                  frequencyDays: days,
+                }));
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select frequency" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="daily">Every Day</SelectItem>
+                <SelectItem value="weekly">Every Week</SelectItem>
+                <SelectItem value="monthly">Every Month</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </>
       )}
