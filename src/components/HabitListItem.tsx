@@ -1,11 +1,9 @@
 import { Habit } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { HabitDateCell } from "./HabitDateCell";
 import { calculateHabitScore } from "@/lib/scoring";
 import { SimplePie } from "./SimplePie";
+import { UpdateHabitDialog } from "./UpdateHabitDialog";
 
 interface HabitListItemProps {
   habit: Habit;
@@ -21,14 +19,6 @@ export function HabitListItem({
   visibleDates,
 }: HabitListItemProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [numericValue, setNumericValue] = useState<number>(0);
-
-  const handleSave = () => {
-    if (selectedDate) {
-      updateCompletion(habit.id, selectedDate, numericValue);
-      setSelectedDate(null);
-    }
-  };
 
   const score = calculateHabitScore(habit); // Calculate the score
 
@@ -45,49 +35,22 @@ export function HabitListItem({
               key={date}
               habit={habit}
               date={date}
-              onClick={() => {
-                if (habit.type === "boolean") {
-                  updateCompletion(habit.id, date, habit.history[date] ? 0 : 1);
-                  return;
-                }
-                
-                setSelectedDate(date);
-                setNumericValue(habit.history[date] || 0);
-              }}
+              onClick={() => setSelectedDate(date)}
             />
           ))}
         </div>
       </div>
-      {selectedDate && (
-        <Dialog open={!!selectedDate} onOpenChange={() => setSelectedDate(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Update Habit</DialogTitle>
-            </DialogHeader>
-            {habit.type === "boolean" ? (
-              <Button
-                onClick={() => {
-                  updateCompletion(habit.id, selectedDate, habit.history[selectedDate] ? 0 : 1);
-                  setSelectedDate(null);
-                }}
-                variant={habit.history[selectedDate] ? "secondary" : "default"}
-              >
-                {habit.history[selectedDate] ? "Mark as Incomplete" : "Mark as Complete"}
-              </Button>
-            ) : (
-              <div className="space-y-4">
-                <label className="block text-sm font-medium">Value</label>
-                <Input
-                  type="number"
-                  value={numericValue}
-                  onChange={(e) => setNumericValue(parseInt(e.target.value, 10))}
-                />
-                <Button onClick={handleSave}>Save</Button>
-              </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
+      <UpdateHabitDialog
+        habit={habit}
+        date={selectedDate}
+        open={!!selectedDate}
+        onClose={() => setSelectedDate(null)}
+        onSave={(value) => {
+          if (selectedDate) {
+            updateCompletion(habit.id, selectedDate, value);
+          }
+        }}
+      />
     </div>
   );
 }
