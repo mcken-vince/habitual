@@ -5,6 +5,10 @@ import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/s
 import { EditIcon } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
 import { HabitForm } from "./HabitForm";
+import { calculateHabitScore } from "@/lib/scoring";
+import { InteractiveLineChart } from "./InteractiveLineChart";
+import { getDatesInRange } from "@/lib/dates";
+import { UpdateHabitDialog } from "./UpdateHabitDialog";
 
 interface HabitViewProps {
   habit: Habit;
@@ -12,10 +16,6 @@ interface HabitViewProps {
   onClose: () => void;
   onUpdateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
 }
-import { calculateHabitScore } from "@/lib/scoring";
-import { InteractiveLineChart } from "./InteractiveLineChart";
-import { getDatesInRange } from "@/lib/dates";
-import { UpdateHabitDialog } from "./UpdateHabitDialog";
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
