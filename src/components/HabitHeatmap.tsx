@@ -6,6 +6,8 @@ import { addAlpha } from "@/lib/color";
 interface HabitHeatmapProps {
   habit: Habit;
   dates: string[];
+  editable?: boolean;
+  onDateClick?: (date: string, value: number) => void;
 }
 
 function padDatesToSunday(dates: string[]) {
@@ -29,7 +31,12 @@ function groupDatesByWeek(dates: string[]) {
   return weeks;
 }
 
-export const HabitHeatmap = ({ habit, dates }: HabitHeatmapProps) => {
+export const HabitHeatmap = ({
+  habit,
+  dates,
+  editable = false,
+  onDateClick
+}: HabitHeatmapProps) => {
   const getColorIntensity = (value: number): string => {
     const color = habit.color;
     if (value === 0) return "var(--color-gray-200)"; // No completion
@@ -62,7 +69,7 @@ export const HabitHeatmap = ({ habit, dates }: HabitHeatmapProps) => {
       const d = new Date(date);
       return d.getDate() === 1;
     })
-    
+
     const lastDate = week[0];
     const showLabel = idx === 0 || containsFirstOfMonth;
     const currentMonth = new Date(lastDate).toLocaleString("default", {
@@ -83,7 +90,7 @@ export const HabitHeatmap = ({ habit, dates }: HabitHeatmapProps) => {
     <ScrollArea ref={scrollAreaRef} className="w-full h-fit pb-4">
       <div className="flex flex-col">
         {/* Month labels */}
-        <div className="flex gap-1 mb-1 ml-8">
+        <div className="flex gap-1 mb-1 ml-8 select-none">
           {monthLabels}
         </div>
         {/* Heatmap grid */}
@@ -99,9 +106,14 @@ export const HabitHeatmap = ({ habit, dates }: HabitHeatmapProps) => {
                 return (
                   <div
                     key={date}
-                    className="w-8 h-8 pt-1 rounded flex align-center justify-center"
+                    className={`w-8 h-8 pt-1 rounded flex align-center justify-center ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
                     style={{ backgroundColor: getColorIntensity(value) }}
                     title={`${date}: ${value} ${habit.unit || ""}`}
+                    onClick={
+                      editable
+                        ? () => onDateClick?.(date, value)
+                        : undefined
+                    }
                   >
                     {new Date(date).getDate()}
                   </div>
