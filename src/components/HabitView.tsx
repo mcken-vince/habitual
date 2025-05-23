@@ -15,37 +15,39 @@ interface HabitViewProps {
 import { calculateHabitScore } from "@/lib/scoring";
 import { InteractiveLineChart } from "./InteractiveLineChart";
 import { getDatesInRange } from "@/lib/dates";
+import { UpdateHabitDialog } from "./UpdateHabitDialog";
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [editDate, setEditDate] = useState<string | null>(null);
 
   const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
 
   const score = calculateHabitScore(habit); // Calculate the score
   const scoreHistory = allDates.map((date, idx) => {
-  // Build a partial history up to and including this date
-  const partialHistory: typeof habit.history = {};
-  for (let i = 0; i <= idx; i++) {
-    const d = allDates[i];
-    if (habit.history[d] !== undefined) {
-      partialHistory[d] = habit.history[d];
+    // Build a partial history up to and including this date
+    const partialHistory: typeof habit.history = {};
+    for (let i = 0; i <= idx; i++) {
+      const d = allDates[i];
+      if (habit.history[d] !== undefined) {
+        partialHistory[d] = habit.history[d];
+      }
     }
-  }
-  // Calculate score for this day
-  const habitForDay = { ...habit, history: partialHistory };
-  return {
-    date,
-    value: calculateHabitScore(habitForDay),
-  };
-});
+    // Calculate score for this day
+    const habitForDay = { ...habit, history: partialHistory };
+    return {
+      date,
+      value: calculateHabitScore(habitForDay),
+    };
+  });
 
-// const formattedHistory = allDates.map((date) => {
-//   const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
-//   return {
-//     date,
-//     value,
-//   };
-// })
+  // const formattedHistory = allDates.map((date) => {
+  //   const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
+  //   return {
+  //     date,
+  //     value,
+  //   };
+  // })
 
   return (
     <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
@@ -95,12 +97,43 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   </p>
                 </div>
               )}
-             
+
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
-              {/* Pass all dates to the HabitHeatmap */}
-              <HabitHeatmap habit={habit} dates={allDates} />
             </>
           )}
+          {/* Pass all dates to the HabitHeatmap */}
+           <HabitHeatmap
+            habit={habit}
+            dates={allDates}
+            editable={isEditing}
+            onDateClick={
+              isEditing
+                ? (date) => {
+                  if (habit.type === "boolean") {
+                    onUpdateHabit(habit.id, {...habit, history: {...habit.history, [date]: habit.history[date] ? 0 : 1}});
+                  } else {
+                    setEditDate(date)
+                  }
+                }
+                : undefined
+            }
+          />
+          <UpdateHabitDialog
+            habit={habit}
+            date={editDate}
+            open={!!editDate}
+            onClose={() => setEditDate(null)}
+            onSave={(value) => {
+              if (editDate) {
+                onUpdateHabit(habit.id, {
+                  history: {
+                    ...habit.history,
+                    [editDate]: value,
+                  },
+                });
+              }
+            }}
+          />
         </div>
       </SheetContent>
     </Sheet>
