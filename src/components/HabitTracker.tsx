@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -13,11 +13,28 @@ function HabitTracker() {
   const { habits, addHabit, updateHabit, updateCompletion } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOpen, setHabitFormOpen] = useState(false);
-  const [visibleDateCount] = useState(5);
-  const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDateCount));
+  const [visibleDatesCount, setVisibleDatesCount] = useState(5);
+  const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
   const [isDragging, setIsDragging] = useState(false);
   const dragStartX = useRef<number | null>(null);
 
+  // Dynamically adjust visibleDateCount based on screen width
+  useEffect(() => {
+    const calculateDateCount = () => {
+      // Example: 60px per date column, min 5
+      const width = window.innerWidth;
+      const max = Math.floor((width - 200) / 60);
+      const min = 5;
+      const count = Math.max(min, max); // 120px for sidebar/padding
+      console.log(`Calculating date count based on window width: ${width}`);
+      console.log(min, max, count)
+      setVisibleDatesCount(count);
+      setVisibleDates(prev => getDatesInRange(new Date(prev[0]), count));
+    };
+    calculateDateCount();
+    window.addEventListener("resize", calculateDateCount);
+    return () => window.removeEventListener("resize", calculateDateCount);
+  }, []);
 
   const openHabitView = (habit: Habit) => {
     setSelectedHabit(habit);
@@ -51,7 +68,7 @@ function HabitTracker() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const maxStartDate = new Date(today);
-      maxStartDate.setDate(today.getDate() - (visibleDateCount - 1));
+      maxStartDate.setDate(today.getDate() - (visibleDatesCount - 1));
 
       if (direction === 1 && newStartDate > today) {
         setIsDragging(false);
@@ -59,7 +76,7 @@ function HabitTracker() {
         return;
       }
 
-      setVisibleDates(getDatesInRange(newStartDate, visibleDateCount));
+      setVisibleDates(getDatesInRange(newStartDate, visibleDatesCount));
       dragStartX.current = clientX; // Reset drag start position
     }
   };
@@ -123,15 +140,14 @@ function HabitTracker() {
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
-        <div className="grid grid-cols-[repeat(5,1fr)] items-center" onMouseDown={handleMouseDown}
+        <div className="grid items-center"
+          style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, 1fr)` }}
+          onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}>
           {visibleDates.map((date) => (
             <div key={date} className="flex align-center justify-center w-10">
               <div className="max-w-8 text-center text-sm font-medium">{
-                // new Date(date).toLocaleDateString("en-CA", {
-                //   weekday: "short", day: "2-digit", month: "short"
-                // }).split(" ").reverse().join(" ")
-                new Date(date).toUTCString().split(" ").slice(0, 4).join(" ")
+                new Date(date).toUTCString().split(" ").slice(0, 2).join(" ").replace(',', '')
               }
               </div>
             </div>

@@ -29,7 +29,8 @@ export function HabitListItem({
           <SimplePie percentage={score} color={habit.color}/>
           <h3 className="text-md font-semibold">{habit.name}</h3>
         </div>
-        <div className="grid grid-cols-[repeat(5,1fr)]">
+        <div className="grid"
+          style={{ gridTemplateColumns: `repeat(${visibleDates.length}, 1fr)` }}>
           {visibleDates.map((date) => (
             <HabitDateCell
               key={date}
