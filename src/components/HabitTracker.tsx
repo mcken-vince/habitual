@@ -58,7 +58,7 @@ function HabitTracker() {
     if (!isDragging || dragStartX.current === null) return;
 
     const dragDistance = clientX - dragStartX.current;
-    if (Math.abs(dragDistance) > 50) {
+    if (Math.abs(dragDistance) >= 40) {
       const direction = dragDistance < 0 ? -1 : 1;
       // Parse as local date (YYYY-MM-DD)
       const [year, month, day] = visibleDates[0].split('-').map(Number);
