@@ -21,13 +21,11 @@ function HabitTracker() {
   // Dynamically adjust visibleDateCount based on screen width
   useEffect(() => {
     const calculateDateCount = () => {
-      // Example: 60px per date column, min 5
+      // 42px per date column, min 5
       const width = window.innerWidth;
-      const max = Math.floor((width - 200) / 60);
+      const max = Math.floor((width - 120) / 42); // 120px for sidebar/padding
       const min = 5;
-      const count = Math.max(min, max); // 120px for sidebar/padding
-      console.log(`Calculating date count based on window width: ${width}`);
-      console.log(min, max, count)
+      const count = Math.max(min, max);
       setVisibleDatesCount(count);
       setVisibleDates(prev => getDatesInRange(new Date(prev[0]), count));
     };
