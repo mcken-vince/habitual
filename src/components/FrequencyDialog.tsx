@@ -11,7 +11,7 @@ interface FrequencyDialogProps {
   onOpenChange: (open: boolean) => void;
   initialFrequencyType: FrequencyType;
   initialFrequencyDays: number;
-  initialFrequencyTimes: number;
+  initialTarget: number;
   onSave: (type: FrequencyType, days: number, times: number) => void;
 }
 
@@ -20,23 +20,23 @@ export function FrequencyDialog({
   onOpenChange,
   initialFrequencyType,
   initialFrequencyDays,
-  initialFrequencyTimes,
+  initialTarget,
   onSave,
 }: FrequencyDialogProps) {
   const [dialogFrequencyType, setDialogFrequencyType] = useState<FrequencyType>(initialFrequencyType);
   const [dialogFrequencyDays, setDialogFrequencyDays] = useState<number>(initialFrequencyDays);
-  const [dialogFrequencyTimes, setDialogFrequencyTimes] = useState<number>(initialFrequencyTimes);
+  const [dialogTarget, setDialogTarget] = useState<number>(initialTarget);
 
   useEffect(() => {
     if (open) {
       setDialogFrequencyType(initialFrequencyType);
       setDialogFrequencyDays(initialFrequencyDays);
-      setDialogFrequencyTimes(initialFrequencyTimes);
+      setDialogTarget(initialTarget);
     }
-  }, [open, initialFrequencyType, initialFrequencyDays, initialFrequencyTimes]);
+  }, [open, initialFrequencyType, initialFrequencyDays, initialTarget]);
 
   function handleSave() {
-    onSave(dialogFrequencyType, dialogFrequencyDays, dialogFrequencyTimes);
+    onSave(dialogFrequencyType, dialogFrequencyDays, dialogTarget);
     onOpenChange(false);
   }
 
@@ -77,9 +77,9 @@ export function FrequencyDialog({
                 type="number"
                 min={1}
                 max={7}
-                value={dialogFrequencyType === "timesPerWeek" ? dialogFrequencyTimes : 1}
+                value={dialogFrequencyType === "timesPerWeek" ? dialogTarget : 1}
                 disabled={dialogFrequencyType !== "timesPerWeek"}
-                onChange={e => setDialogFrequencyTimes(parseInt(e.target.value, 10))}
+                onChange={e => setDialogTarget(parseInt(e.target.value, 10))}
               />
               times per week
             </label>
@@ -92,9 +92,9 @@ export function FrequencyDialog({
                 type="number"
                 min={1}
                 max={30}
-                value={dialogFrequencyType === "timesPerMonth" ? dialogFrequencyTimes : 1}
+                value={dialogFrequencyType === "timesPerMonth" ? dialogTarget : 1}
                 disabled={dialogFrequencyType !== "timesPerMonth"}
-                onChange={e => setDialogFrequencyTimes(parseInt(e.target.value, 10))}
+                onChange={e => setDialogTarget(parseInt(e.target.value, 10))}
               />
               times per month
             </label>
@@ -106,9 +106,9 @@ export function FrequencyDialog({
                 className="inline w-14 mx-2"
                 type="number"
                 min={1}
-                value={dialogFrequencyType === "timesInXDays" ? dialogFrequencyTimes : 1}
+                value={dialogFrequencyType === "timesInXDays" ? dialogTarget : 1}
                 disabled={dialogFrequencyType !== "timesInXDays"}
-                onChange={e => setDialogFrequencyTimes(parseInt(e.target.value, 10))}
+                onChange={e => setDialogTarget(parseInt(e.target.value, 10))}
               />
               times in
               <Input

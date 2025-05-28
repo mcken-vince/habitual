@@ -83,10 +83,10 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                 <p className="text-sm font-medium">Description:</p>
                 <p>{habit.description}</p>
               </div>
-              {habit.type === "boolean" && habit.frequencyTimes && habit.frequencyDays && (
+              {habit.type === "boolean" && habit.target && habit.frequencyDays && (
                 <div>
                   <p className="text-sm font-medium">Frequency:</p>
-                  <p>{habit.frequencyTimes} times every {habit.frequencyDays} days</p>
+                  <p>{habit.target} times every {habit.frequencyDays} days</p>
                 </div>
               )}
               {habit.type === "measurable" && habit.frequencyDays && (
@@ -97,7 +97,6 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   </p>
                 </div>
               )}
-
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
             </>
           )}

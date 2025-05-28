@@ -16,16 +16,16 @@ type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth
 
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
   const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; color: string; }>(
-    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyTimes: undefined, frequencyDays: undefined, color: "#000000" }
+    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#000000" }
   );
 
     // Helper to summarize frequency
   function getFrequencySummary() {
-    if (habit.frequencyDays === 1 && habit.frequencyTimes === 1) return "Every day";
-    if (habit.frequencyDays && habit.frequencyTimes === 1) return `Every ${habit.frequencyDays} days`;
-    if (habit.frequencyDays === 7) return `${habit.frequencyTimes || 1} times per week`;
-    if (habit.frequencyDays === 30) return `${habit.frequencyTimes || 1} times per month`;
-    if (habit.frequencyDays && habit.frequencyTimes) return `${habit.frequencyTimes} times in ${habit.frequencyDays} days`;
+    if (habit.frequencyDays === 1 && habit.target === 1) return "Every day";
+    if (habit.frequencyDays && habit.target === 1) return `Every ${habit.frequencyDays} days`;
+    if (habit.frequencyDays === 7) return `${habit.target || 1} times per week`;
+    if (habit.frequencyDays === 30) return `${habit.target || 1} times per month`;
+    if (habit.frequencyDays && habit.target) return `${habit.target} times in ${habit.frequencyDays} days`;
     return "Select frequency";
   }
 
@@ -34,11 +34,11 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
 
   // Compute dialog initial values from habit
   function getDialogFrequencyType(): FrequencyType {
-    if (habit.frequencyDays === 1 && habit.frequencyTimes === 1) return "everyDay";
-    if (habit.frequencyDays && habit.frequencyTimes === 1) return "everyXDays";
+    if (habit.frequencyDays === 1 && habit.target === 1) return "everyDay";
+    if (habit.frequencyDays && habit.target === 1) return "everyXDays";
     if (habit.frequencyDays === 7) return "timesPerWeek";
     if (habit.frequencyDays === 30) return "timesPerMonth";
-    if (habit.frequencyDays && habit.frequencyTimes) return "timesInXDays";
+    if (habit.frequencyDays && habit.target) return "timesInXDays";
     return "everyDay";
   }
 
@@ -47,22 +47,22 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
   }
 
   function handleFrequencyDialogSave(type: FrequencyType, days: number, times: number) {
-    let frequencyDays = 1, frequencyTimes = 1;
+    let frequencyDays = 1, target = 1;
     if (type === "everyDay") {
-      frequencyDays = 1; frequencyTimes = 1;
+      frequencyDays = 1; target = 1;
     } else if (type === "everyXDays") {
-      frequencyDays = days; frequencyTimes = 1;
+      frequencyDays = days; target = 1;
     } else if (type === "timesPerWeek") {
-      frequencyDays = 7; frequencyTimes = times;
+      frequencyDays = 7; target = times;
     } else if (type === "timesPerMonth") {
-      frequencyDays = 30; frequencyTimes = times;
+      frequencyDays = 30; target = times;
     } else if (type === "timesInXDays") {
-      frequencyDays = days; frequencyTimes = times;
+      frequencyDays = days; target = times;
     }
     setHabit((prev) => ({
       ...prev,
       frequencyDays,
-      frequencyTimes,
+      target,
       frequencyType: type,
     }));
   }
@@ -131,7 +131,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
               onOpenChange={setFrequencyDialogOpen}
               initialFrequencyType={getDialogFrequencyType()}
               initialFrequencyDays={habit.frequencyDays || 7}
-              initialFrequencyTimes={habit.frequencyTimes || 1}
+              initialTarget={habit.target || 1}
               onSave={handleFrequencyDialogSave}
             />
           </div>

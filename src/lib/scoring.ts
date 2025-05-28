@@ -8,7 +8,7 @@ import { Habit } from "@/types";
  * @returns The calculated score as a number.
  */
 export function calculateHabitScore(habit: Habit): number {
-  const { type, target, frequencyTimes, frequencyDays, history } = habit;
+  const { type, target, frequencyDays, history } = habit;
 
   // Parameters for weighting
   const windowDays = frequencyDays || 7;
@@ -38,7 +38,7 @@ export function calculateHabitScore(habit: Habit): number {
   // Normalize score to percentage
   let score = 0;
   if (type === "boolean") {
-    const freq = frequencyTimes || windowDays;
+    const freq = target || windowDays;
     score = Math.min((weightedSum / totalWeight) * 100 / freq * windowDays, 100);
   } else if (type === "measurable" && target) {
     score = Math.min((weightedSum / totalWeight) * 100, 100);
