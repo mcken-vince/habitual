@@ -9,6 +9,7 @@ import { calculateHabitScore } from "@/lib/scoring";
 import { InteractiveLineChart } from "./InteractiveLineChart";
 import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
+import { FrequencyProgressBarChart } from "./FrequencyProgressBarChart";
 
 interface HabitViewProps {
   habit: Habit;
@@ -97,6 +98,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   </p>
                 </div>
               )}
+              <FrequencyProgressBarChart habit={habit} />
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
             </>
           )}
