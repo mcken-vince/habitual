@@ -40,9 +40,9 @@ export const HabitHeatmap = ({
   const getColorIntensity = (value: number): string => {
     const color = habit.color;
     if (value === 0) return "var(--color-gray-200)"; // No completion
-    if (value < habit.target! / 2) return addAlpha(color, 0.25); // Less than half completion
+    if (value < habit.target! / 2) return addAlpha(color, 0.3); // Less than half completion
     if (value < habit.target!) return addAlpha(color, 0.5); // Over half completion
-    return color; // Full completion
+    return addAlpha(color, 0.7); // Full completion (lighter for accessibility)
   };
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
