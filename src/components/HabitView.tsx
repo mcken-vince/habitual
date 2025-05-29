@@ -1,8 +1,8 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
-import { EditIcon } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
+import { ArrowLeftIcon, EditIcon } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
 import { HabitForm } from "./HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
@@ -51,18 +51,22 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
   // })
 
   return (
-    <Sheet open={isOpen && !!habit} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto">
-        <SheetHeader>
+    <Sheet open={isOpen && !!habit} modal={true}>
+      <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto [&>button:first-of-type]:hidden">
+        <SheetHeader >
           <SheetTitle className="flex flex-row items-center w-full justify-between">
-            {habit.name}
+            <div className="flex flex-row items-center gap-2">
+              <Button variant="ghost" size="icon" onClick={onClose} className="p-2">
+                <ArrowLeftIcon className="w-5 h-5" />
+              </Button>
+              <span>{habit.name}</span>
+            </div>
             {!isEditing && (
               <Button variant="ghost" onClick={() => setIsEditing(true)} className="p-2">
                 <EditIcon className="w-5 h-5" />
               </Button>
             )}
           </SheetTitle>
-          <SheetClose />
         </SheetHeader>
         <div className="space-y-4">
           {isEditing ? (
@@ -103,7 +107,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
             </>
           )}
           {/* Pass all dates to the HabitHeatmap */}
-           <HabitHeatmap
+          <HabitHeatmap
             habit={habit}
             dates={allDates}
             editable={isEditing}
@@ -111,7 +115,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
               isEditing
                 ? (date) => {
                   if (habit.type === "boolean") {
-                    onUpdateHabit(habit.id, {...habit, history: {...habit.history, [date]: habit.history[date] ? 0 : 1}});
+                    onUpdateHabit(habit.id, { ...habit, history: { ...habit.history, [date]: habit.history[date] ? 0 : 1 } });
                   } else {
                     setEditDate(date)
                   }
