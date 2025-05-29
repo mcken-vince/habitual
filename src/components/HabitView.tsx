@@ -94,11 +94,11 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
                   <p>{habit.target} times every {habit.frequencyDays} days</p>
                 </div>
               )}
-              {habit.type === "measurable" && habit.frequencyDays && (
+              {habit.type === "measurable" && (
                 <div>
                   <p className="text-sm font-medium">Frequency:</p>
                   <p>
-                    {habit.target} {habit.unit} every {habit.frequencyDays} days
+                    {habit.target} {habit.unit} every {habit.frequencyDays === 1 ? 'day' : `${habit.frequencyDays ?? '0'} days`}
                   </p>
                 </div>
               )}
