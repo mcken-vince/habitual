@@ -4,21 +4,32 @@ import { Habit } from "@/types"
 function getPeriodRange(period: "week" | "month" | "quarter" | "year") {
   const now = new Date()
   let start: Date
-  const end: Date = new Date(now)
+  let end: Date
   switch (period) {
-    case "week":
+    case "week": {
       start = new Date(now)
       start.setDate(now.getDate() - now.getDay())
+      end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      console.log("start", start, "end", end)
       break
-    case "month":
+    }
+    case "month": {
       start = new Date(now.getFullYear(), now.getMonth(), 1)
+      end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
       break
-    case "quarter":
-      start = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1)
+    }
+    case "quarter": {
+      const quarterStartMonth = Math.floor(now.getMonth() / 3) * 3;
+      start = new Date(now.getFullYear(), quarterStartMonth, 1)
+      end = new Date(now.getFullYear(), quarterStartMonth + 3, 0)
       break
-    case "year":
+    }
+    case "year": {
       start = new Date(now.getFullYear(), 0, 1)
+      end = new Date(now.getFullYear(), 12, 0)
       break
+    }
   }
   return { start, end }
 }
@@ -36,22 +47,13 @@ function getProgress(habit: Habit, period: "week" | "month" | "quarter" | "year"
     total += habit.history[key] || 0
     days++
   }
-  if (habit.type === "boolean") {
-    // For boolean, target is always 1 per period
-    return { value: total, target: days }
-  } else if (habit.type === "measurable") {
-    let target = habit.target
-    if (period === "week" && habit.frequencyDays === 7)
-      target = habit.target
-    else if (period === "month" && habit.frequencyDays === 30)
-      target = habit.target
-    else if (period === "quarter")
-      target = habit.target * 3
-    else if (period === "year")
-      target = habit.target * 12
-    return { value: total, target }
-  }
-  return { value: total, target: days }
+    let target = habit.target / (habit.frequencyDays ?? 1) * days
+    if (habit.type === 'boolean') {
+      // Clamp boolean habit target to not exceed days in period
+      target = Math.min(target, days)
+    }
+
+    return { value: total, target: Math.round(target) } 
 }
 
 export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
@@ -68,7 +70,7 @@ export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
       name: label,
       value,
       target,
-      percent: Math.min((value / target) * 100, 100),
+      percent: Math.min((value / target * 100), 100),
     }
   })
 
@@ -82,8 +84,13 @@ export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" domain={[0, 100]} hide />
           <YAxis dataKey="name" type="category" width={100} />
-          <Tooltip formatter={(value: number, name, props) => [`${value} / ${props.payload.target}`, "Progress"]} />
-          <Bar dataKey="value" fill={habit.color} background />
+          <Tooltip 
+            formatter={(_, __, props) => [
+              `${props.payload.value} / ${props.payload.target}`,
+              "Progress"
+            ]}
+          />
+          <Bar dataKey="percent" fill={habit.color} background />
         </BarChart>
       </ResponsiveContainer>
     </div>
