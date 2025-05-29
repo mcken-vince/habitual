@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Habit } from "@/types"
+import { addAlpha } from "@/lib/color"
 
 function getPeriodRange(period: "week" | "month" | "quarter" | "year") {
   const now = new Date()
@@ -90,7 +91,7 @@ export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
               "Progress"
             ]}
           />
-          <Bar dataKey="percent" fill={habit.color} background />
+          <Bar dataKey="percent" fill={addAlpha(habit.color, 0.7)} background />
         </BarChart>
       </ResponsiveContainer>
     </div>
