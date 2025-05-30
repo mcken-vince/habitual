@@ -36,7 +36,14 @@ export function HabitListItem({
               key={date}
               habit={habit}
               date={date}
-              onClick={() => setSelectedDate(date)}
+              onClick={() => {
+                if (habit.type === "boolean") {
+                  const isCompleted = habit.history[date];
+                  updateCompletion(habit.id, date, isCompleted ? 0 : 1);
+                } else {
+                  setSelectedDate(date);
+                }
+              }}
             />
           ))}
         </div>
