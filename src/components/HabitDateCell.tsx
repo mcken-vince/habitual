@@ -1,6 +1,6 @@
 import { Habit } from "@/types";
 import { Button } from "./ui/button";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface HabitDateCellProps {
   habit: Habit;
@@ -11,36 +11,54 @@ interface HabitDateCellProps {
 export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
   const isCompleted = habit.history[date];
   const textColor = isCompleted ? habit.color : "var(--color-gray-200)";
+  const [isPressing, setIsPressing] = useState(false);
+  const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleLongPress = () => {
-    onClick();
-  };
+  useEffect(() => {
+    if (isPressing) {
+      timerRef.current = setTimeout(() => {
+        setLongPressTriggered(true);
+        onClick();
+      }, 500);
+    } else {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    }
+    // Cleanup on unmount or when isPressing changes
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isPressing, onClick]);
 
   const startPress = () => {
-    if (habit.type === "boolean") {
-      timerRef.current = setTimeout(handleLongPress, 500);
-    }
+    setLongPressTriggered(false);
+    setIsPressing(true);
   };
 
-  const endPress = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+  const endPress = (e?: React.SyntheticEvent) => {
+    setIsPressing(false);
+    if (longPressTriggered && e) {
+      e.preventDefault();
+      e.stopPropagation();
     }
   };
 
   return (
-    <div key={date} className="flex flex-col items-center">
+    <div key={date} className="flex flex-col items-center no-select">
       <Button
         onPointerDown={startPress}
         onPointerUp={endPress}
         onPointerLeave={endPress}
         onTouchStart={startPress}
         onTouchEnd={endPress}
-        onClick={habit.type !== "boolean" ? onClick : undefined}
         variant="ghost"
-        className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit"
+        className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit select-none"
       >
         {habit.type === "boolean" ? (
           <span style={{ color: textColor }} className="text-2xl font-bold">
