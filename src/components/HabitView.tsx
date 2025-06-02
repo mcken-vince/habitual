@@ -10,6 +10,7 @@ import { InteractiveLineChart } from "./InteractiveLineChart";
 import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
 import { FrequencyProgressBarChart } from "./FrequencyProgressBarChart";
+import { HabitHistoryBarChart } from "./HabitHistoryBarChart";
 
 interface HabitViewProps {
   habit: Habit;
@@ -106,6 +107,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
             </>
           )}
+          <HabitHistoryBarChart habit={habit} />
           {/* Pass all dates to the HabitHeatmap */}
           <HabitHeatmap
             habit={habit}
