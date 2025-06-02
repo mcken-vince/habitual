@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import {
   Card,
@@ -121,6 +121,15 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
                 })
               }}
             />
+            {/* Add YAxis with fixed domain */}
+            <YAxis
+              domain={[0, 100]}
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              ticks={[0, 25, 50, 75, 100]}
+              tickFormatter={(value) => `${value}%`}
+            />
             <ChartTooltip
               cursor={false}
               content={
@@ -132,7 +141,7 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
                     })
                   }}
                   indicator="dot"
-                />
+                  />
               }
             />
             {/* <Area
