@@ -12,13 +12,14 @@ export function calculateHabitScore(habit: Habit): number {
 
   // Parameters for weighting
   const windowDays = frequencyDays || 7;
-  const scoringWindow = Math.max(windowDays * 2, 100); // Ensure at least 100 days
+  const scoringWindow = Math.max(windowDays * 12, 120); // Extend window for longer memory
   const today = new Date();
   let weightedSum = 0;
   let totalWeight = 0;
 
   // Exponential smoothing parameters
-  const alpha = 0.15; // Smoothing factor (0 < alpha <= 1), adjust as needed
+  // Lower alpha = longer memory, slower to reach 100%
+  const alpha = 0.07; // Smoothing factor (0 < alpha <= 1), adjust as needed
 
   for (let i = 0; i < scoringWindow; i++) {
     const date = new Date(today);
@@ -39,9 +40,11 @@ export function calculateHabitScore(habit: Habit): number {
   // Normalize score to percentage
   let score = 0;
   if (type === "boolean") {
-    // Target completions per window, distributed per day
-    const freq = target || windowDays;
-    const weightedTarget = totalWeight * (freq / windowDays);
+    // For daily habits, expect 1 completion per day
+    const isDaily = frequencyDays === 1;
+    const freq = isDaily ? 1 : (target || windowDays);
+    const daysPerWindow = isDaily ? 1 : windowDays;
+    const weightedTarget = totalWeight * (freq / daysPerWindow);
     score = Math.min((weightedSum / weightedTarget) * 100, 100);
   } else if (type === "measurable" && target) {
     score = Math.min((weightedSum / totalWeight) * 100, 100);
