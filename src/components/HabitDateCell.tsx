@@ -61,7 +61,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
         className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit select-none"
       >
         {habit.type === "boolean" ? (
-          <span style={{ color: textColor }} className="text-2xl font-bold">
+          <span style={{ color: textColor }} className="text-lg font-bold">
             {isCompleted ? "✓" : "✗"}
           </span>
         ) : (
@@ -69,7 +69,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
             style={{ color: textColor }}
             className="flex flex-col items-center"
           >
-            <span className="text-lg font-semibold">{habit.history[date] || 0}</span>
+            <span className="text-lg font-semibold h-5">{habit.history[date] || 0}</span>
             {habit.type === "measurable" && (
               <span className="text-xs mt-1">{habit.unit}</span>
             )}
