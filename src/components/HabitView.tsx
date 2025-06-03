@@ -2,7 +2,7 @@ import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
-import { ArrowLeftIcon, EditIcon } from "lucide-react";
+import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
 import { HabitForm } from "./HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
@@ -17,9 +17,10 @@ interface HabitViewProps {
   isOpen: boolean;
   onClose: () => void;
   onUpdateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
+    onDeleteHabit: (id: string) => void;
 }
 
-export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewProps) => {
+export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editDate, setEditDate] = useState<string | null>(null);
 
@@ -63,9 +64,20 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit }: HabitViewPr
               <span>{habit.name}</span>
             </div>
             {!isEditing && (
-              <Button variant="ghost" onClick={() => setIsEditing(true)} className="p-2">
-                <EditIcon className="w-5 h-5" />
-              </Button>
+              <div className="flex flex-row gap-2">
+                <Button variant="ghost" onClick={() => setIsEditing(true)} className="p-2">
+                  <EditIcon className="w-5 h-5" />
+                </Button>
+                <Button variant="ghost"
+                  onClick={() => {
+                    onDeleteHabit(habit.id);
+                    onClose();
+                  }}
+                  className="p-2"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </Button>
+              </div>
             )}
           </SheetTitle>
         </SheetHeader>

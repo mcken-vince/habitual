@@ -10,7 +10,7 @@ import { PlusIcon } from "lucide-react";
 import { getDatesInRange } from "@/lib/dates";
 
 function HabitTracker() {
-  const { habits, addHabit, updateHabit, updateCompletion } = useHabits();
+  const { habits, addHabit, updateHabit, deleteHabit, updateCompletion } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOpen, setHabitFormOpen] = useState(false);
   const [visibleDatesCount, setVisibleDatesCount] = useState(5);
@@ -47,6 +47,10 @@ function HabitTracker() {
         onUpdateHabit={(id, updatedHabit) => {
           updateHabit(id, updatedHabit);
           setSelectedHabit((prev) => (prev ? { ...prev, ...updatedHabit } : null));
+        }}
+                onDeleteHabit={(id) => {
+          deleteHabit(id);
+          setSelectedHabit(null);
         }}
       />
     )
