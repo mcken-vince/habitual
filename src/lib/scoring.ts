@@ -17,15 +17,16 @@ export function calculateHabitScore(habit: Habit): number {
   let weightedSum = 0;
   let totalWeight = 0;
 
+  // Exponential smoothing parameters
+  const alpha = 0.15; // Smoothing factor (0 < alpha <= 1), adjust as needed
+
   for (let i = 0; i < scoringWindow; i++) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
     const dateStr = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
 
-    // Days ago (0 = today)
-    const daysAgo = i;
-    // Weight: linearly decreases, but minimum weight is 0.2
-    const weight = Math.max(1 - daysAgo / scoringWindow, 0.2);
+    // Exponential weight: alpha * (1 - alpha)^i
+    const weight = alpha * Math.pow(1 - alpha, i);
     totalWeight += weight;
 
     if (type === "boolean") {
@@ -38,8 +39,10 @@ export function calculateHabitScore(habit: Habit): number {
   // Normalize score to percentage
   let score = 0;
   if (type === "boolean") {
+    // Target completions per window, distributed per day
     const freq = target || windowDays;
-    score = Math.min((weightedSum / totalWeight) * 100 / freq * windowDays, 100);
+    const weightedTarget = totalWeight * (freq / windowDays);
+    score = Math.min((weightedSum / weightedTarget) * 100, 100);
   } else if (type === "measurable" && target) {
     score = Math.min((weightedSum / totalWeight) * 100, 100);
   }
