@@ -6,16 +6,23 @@ import { useState } from "react";
 import { ColorSelect } from "./ColorSelect";
 import { FrequencyDialog } from "./FrequencyDialog";
 
+type PartialHabit = Partial<Habit> & {
+  name: string;
+  type: "boolean" | "measurable";
+  color: string;
+  target: number;
+};
+
 interface HabitFormProps {
-  initialHabit?: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; };
-  onSave: (habit: Partial<Habit> & { name: string; type: "boolean" | "measurable", color: string; }) => void;
+  initialHabit?: PartialHabit
+  onSave: (habit: PartialHabit) => void;
   onCancel: () => void;
 }
 
 type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
 
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
-  const [habit, setHabit] = useState<Partial<Habit> & { name: string; type: "boolean" | "measurable"; color: string; }>(
+  const [habit, setHabit] = useState<PartialHabit>(
     initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#000000" }
   );
 
