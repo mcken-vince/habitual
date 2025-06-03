@@ -1,6 +1,6 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { HabitHeatmap } from "./HabitHeatmap";
@@ -27,31 +27,25 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
   const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
 
   const score = calculateHabitScore(habit); // Calculate the score
-  const scoreHistory = allDates.map((date, idx) => {
-    // Build a partial history up to and including this date
-    const partialHistory: typeof habit.history = {};
-    for (let i = 0; i <= idx; i++) {
-      const d = allDates[i];
-      if (habit.history[d] !== undefined) {
-        partialHistory[d] = habit.history[d];
+
+  const scoreHistory = useMemo(() => {
+    return allDates.map((date, idx) => {
+      // Build a partial history up to and including this date
+      const partialHistory: typeof habit.history = {};
+      for (let i = 0; i <= idx; i++) {
+        const d = allDates[i];
+        // Always include the date, defaulting to 0 if not present
+        partialHistory[d] = habit.history[d] !== undefined ? habit.history[d] : 0;
       }
-    }
-    // Calculate score for this day
-    const habitForDay = { ...habit, history: partialHistory };
-    return {
-      date,
-      value: calculateHabitScore(habitForDay),
-    };
-  });
-
-  // const formattedHistory = allDates.map((date) => {
-  //   const value = habit.history[date] || 0; // Default to 0 if no value exists for the date
-  //   return {
-  //     date,
-  //     value,
-  //   };
-  // })
-
+      // Calculate score for this day
+      const habitForDay = { ...habit, history: partialHistory };
+      return {
+        date,
+        value: calculateHabitScore(habitForDay),
+      };
+    });
+  }, [habit, allDates]);
+  
   return (
     <Sheet open={isOpen && !!habit} modal={true}>
       <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto [&>button:first-of-type]:hidden">
