@@ -1,7 +1,7 @@
 import { Habit } from "@/types";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { useEffect, useRef } from "react";
-import { addAlpha } from "@/lib/color";
+import { addAlpha, isColorDark } from "@/lib/color";
 
 interface HabitHeatmapProps {
   habit: Habit;
@@ -65,10 +65,10 @@ export const HabitHeatmap = ({
 
   // Month labels above each week (column)
   const monthLabels = weeks.map((week, idx) => {
-    const containsFirstOfMonth = week.some(date => {
+      const containsFirstOfMonth = week.some(date => {
       const d = new Date(date);
       return d.getDate() === 1;
-    })
+        })
 
     const lastDate = week[0];
     const showLabel = idx === 0 || containsFirstOfMonth;
@@ -103,11 +103,23 @@ export const HabitHeatmap = ({
                   return <div key={`empty-${colIdx}-${rowIdx}`} className="w-8 h-8" />;
                 }
                 const value = habit.history[date] || 0;
+                const bgColor = getColorIntensity(value);
+                // Extract alpha from addAlpha if used
+                let alpha = 1;
+                const alphaMatch = bgColor.match(/rgba\([^)]+, ([\d.]+)\)/);
+                if (alphaMatch) alpha = parseFloat(alphaMatch[1]);
+                const textColor =
+                  bgColor.startsWith("#") && isColorDark(habit.color, alpha)
+                    ? "#fff"
+                    : undefined;
                 return (
                   <div
                     key={date}
-                    className={`w-8 h-8 pt-1 rounded flex align-center justify-center ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
-                    style={{ backgroundColor: getColorIntensity(value) }}
+                    className={`w-8 h-8 pt-1 rounded flex align-center justify-center select-none ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
+                    style={{
+                      backgroundColor: bgColor,
+                      color: textColor,
+                    }}
                     title={`${date}: ${value} ${habit.unit || ""}`}
                     onClick={
                       editable
