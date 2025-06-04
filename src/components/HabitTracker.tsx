@@ -7,7 +7,7 @@ import { useHabits } from "@/hooks/useHabits";
 import { HabitView } from "./HabitView";
 import { HabitForm } from "./HabitForm";
 import { PlusIcon } from "lucide-react";
-import { getDatesInRange } from "@/lib/dates";
+import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 
 function HabitTracker() {
   const { habits, addHabit, updateHabit, deleteHabit, updateCompletion } = useHabits();
@@ -27,7 +27,7 @@ function HabitTracker() {
       const min = 5;
       const count = Math.max(min, max);
       setVisibleDatesCount(count);
-      setVisibleDates(prev => getDatesInRange(new Date(prev[0]), count));
+      setVisibleDates(prev => getDatesInRange(parseDateStringLocal(prev[0]), count));
     };
     calculateDateCount();
     window.addEventListener("resize", calculateDateCount);
@@ -57,31 +57,30 @@ function HabitTracker() {
   }
 
   const handleDragMove = (clientX: number) => {
-    if (!isDragging || dragStartX.current === null) return;
+  if (!isDragging || dragStartX.current === null) return;
 
-    const dragDistance = clientX - dragStartX.current;
-    if (Math.abs(dragDistance) >= 40) {
-      const direction = dragDistance < 0 ? -1 : 1;
-      // Parse as local date (YYYY-MM-DD)
-      const [year, month, day] = visibleDates[0].split('-').map(Number);
-      const baseDate = new Date(year, month - 1, day);
-      const newStartDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate());
-      newStartDate.setDate(newStartDate.getDate() + direction);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const maxStartDate = new Date(today);
-      maxStartDate.setDate(today.getDate() - (visibleDatesCount - 1));
+  const dragDistance = clientX - dragStartX.current;
+  if (Math.abs(dragDistance) >= 40) {
+    const direction = dragDistance < 0 ? -1 : 1;
+    const baseDate = parseDateStringLocal(visibleDates[0]);
+    const newStartDate = new Date(baseDate);
+    newStartDate.setDate(newStartDate.getDate() + direction);
 
-      if (direction === 1 && newStartDate > today) {
-        setIsDragging(false);
-        dragStartX.current = null;
-        return;
-      }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const maxStartDate = new Date(today);
+    maxStartDate.setDate(today.getDate() - (visibleDatesCount - 1));
 
-      setVisibleDates(getDatesInRange(newStartDate, visibleDatesCount));
-      dragStartX.current = clientX; // Reset drag start position
+    if (direction === 1 && newStartDate > today) {
+      setIsDragging(false);
+      dragStartX.current = null;
+      return;
     }
-  };
+
+    setVisibleDates(getDatesInRange(newStartDate, visibleDatesCount));
+    dragStartX.current = clientX; // Reset drag start position
+  }
+};
 
   const handleTouchMove = (event: React.TouchEvent) => {
     handleDragMove(event.touches[0].clientX);
@@ -143,18 +142,23 @@ function HabitTracker() {
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
         <div className="grid items-center"
-          style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, 1fr)` }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}>
-          {visibleDates.map((date) => (
-            <div key={date} className="flex align-center justify-center w-10">
-              <div className="max-w-8 text-center text-sm font-medium">{
-                new Date(date).toUTCString().split(" ").slice(0, 2).join(" ").replace(',', '')
-              }
-              </div>
-            </div>
-          ))}
-        </div>
+  style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, 1fr)` }}
+  onMouseDown={handleMouseDown}
+  onTouchStart={handleTouchStart}>
+  {visibleDates.map((date) => (
+    <div key={date} className="flex align-center justify-center w-10">
+      <div className="max-w-8 text-center text-sm font-medium">
+        {
+          // Use date utils for parsing and display
+          (() => {
+            const d = parseDateStringLocal(date);
+return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+          })()
+        }
+      </div>
+    </div>
+  ))}
+</div>
       </div>
       {/* Habit List */}
       <div>
