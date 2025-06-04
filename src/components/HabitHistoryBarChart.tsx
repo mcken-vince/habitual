@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react"
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { Habit } from "@/types"
 import { MiniBar } from "./MiniBar"
+import { parseDateStringLocal } from "@/lib/dates"
 
 type Grouping = "week" | "month" | "quarter" | "year"
 
@@ -32,7 +32,8 @@ function getPeriodLabel(key: string, grouping: Grouping) {
   if (grouping === "week") return key.replace("-", " W")
   if (grouping === "month") {
     const [year, month] = key.split("-")
-    return `${year} ${new Date(Number(year), Number(month) - 1).toLocaleString("default", { month: "short" })}`
+    // Use date utils for parsing
+    return `${year} ${parseDateStringLocal(`${year}-${month}-01`).toLocaleString("default", { month: "short" })}`
   }
   if (grouping === "quarter") return key.replace("-", " ")
   if (grouping === "year") return key
@@ -43,7 +44,7 @@ function getFirstDayOfISOWeek(year: number, week: number) {
   // ISO week: Monday is the first day of the week
   const simple = new Date(year, 0, 1 + (week - 1) * 7);
   const dow = simple.getDay();
-  const ISOweekStart = simple;
+  const ISOweekStart = new Date(simple);
   if (dow <= 4)
     ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
   else
@@ -76,18 +77,67 @@ function getWeekLabel(key: string, prevKey: string | null) {
   return firstDay.toLocaleDateString(undefined, { day: "numeric" });
 }
 
+function getAllPeriodKeys(habit: Habit, grouping: Grouping) {
+  // Find min and max date in history
+  const dateStrings = Object.keys(habit.history);
+  if (dateStrings.length === 0) return [];
+  const dates = dateStrings.map(parseDateStringLocal);
+  const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+  const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+  // Always include up to today
+  const today = new Date();
+  if (maxDate < today) maxDate.setTime(today.getTime());
+
+  const keys: string[] = [];
+  if (grouping === "week") {
+    // Find the first and last ISO week
+    const current = new Date(minDate);
+    // Set to Monday of the first week
+    current.setDate(current.getDate() - ((current.getDay() + 6) % 7));
+    while (current <= maxDate) {
+      keys.push(getPeriodKey(current, "week"));
+      current.setDate(current.getDate() + 7);
+    }
+  } else if (grouping === "month") {
+    const current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+    while (current <= maxDate) {
+      keys.push(getPeriodKey(current, "month"));
+      current.setMonth(current.getMonth() + 1);
+    }
+  } else if (grouping === "quarter") {
+    const current = new Date(minDate.getFullYear(), Math.floor(minDate.getMonth() / 3) * 3, 1);
+    while (current <= maxDate) {
+      keys.push(getPeriodKey(current, "quarter"));
+      current.setMonth(current.getMonth() + 3);
+    }
+  } else if (grouping === "year") {
+    const current = new Date(minDate.getFullYear(), 0, 1);
+    while (current <= maxDate) {
+      keys.push(getPeriodKey(current, "year"));
+      current.setFullYear(current.getFullYear() + 1);
+    }
+  }
+  return keys;
+}
+
 export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
   const [grouping, setGrouping] = useState<Grouping>("week");
 
   const data = useMemo(() => {
     const counts: Record<string, number> = {}
     Object.entries(habit.history).forEach(([dateStr, value]) => {
-      const date = new Date(dateStr)
+      // Use date utils for parsing
+      const date = parseDateStringLocal(dateStr)
       const key = getPeriodKey(date, grouping)
       counts[key] = (counts[key] || 0) + value
     });
+
+    // Get all period keys in range, even if no completions
+    const allKeys = getAllPeriodKeys(habit, grouping);
+
     // Sort keys chronologically
-    const sortedKeys = Object.keys(counts).sort();
+    const sortedKeys = allKeys.length > 0 ? allKeys : Object.keys(counts).sort();
+
     return sortedKeys.map((key, idx) => {
       let label = getPeriodLabel(key, grouping);
       if (grouping === "week") {
@@ -96,11 +146,11 @@ export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
       }
       return {
         period: label,
-        completions: counts[key],
+        completions: counts[key] || 0,
         key,
       };
     });
-  }, [habit.history, grouping]);
+  }, [habit, grouping]);
 
   const maxCompletions = data.reduce((max, d) => Math.max(max, d.completions), 0);
   const yTicks = maxCompletions <= 5 ? maxCompletions : 5;
@@ -128,7 +178,7 @@ export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
       <div className="flex flex-row items-end h-50 mt-4 pb-2 relative">
         {/* Y Axis grid lines */}
         <div className="absolute left-0 top-0 w-full h-48 z-0 pointer-events-none">
-          {yAxisLabels.map((label, i) => (
+          {yAxisLabels.map((_label, i) => (
             <div
               key={i}
               className="flex items-center absolute left-0 w-full"
