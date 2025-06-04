@@ -2,6 +2,7 @@ import { Habit } from "@/types";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { useEffect, useRef } from "react";
 import { addAlpha, isColorDark } from "@/lib/color";
+import { toDateStringLocal, parseDateStringLocal } from "@/lib/dates";
 
 interface HabitHeatmapProps {
   habit: Habit;
@@ -12,13 +13,13 @@ interface HabitHeatmapProps {
 
 function padDatesToSunday(dates: string[]) {
   if (dates.length === 0) return [];
-  const firstDate = new Date(dates[0]);
+  const firstDate = parseDateStringLocal(dates[0]);
   const dayOfWeek = firstDate.getDay(); // 0 = Sunday
   const paddedDates = [...dates];
   for (let i = 1; i <= dayOfWeek; i++) {
     const d = new Date(firstDate);
-    d.setDate(d.getDate() - i);
-    paddedDates.unshift(d.toISOString().slice(0, 10));
+    d.setDate(firstDate.getDate() - i);
+    paddedDates.unshift(toDateStringLocal(d));
   }
   return paddedDates;
 }
@@ -63,28 +64,28 @@ export const HabitHeatmap = ({
   const weeks = groupDatesByWeek(paddedDates);
   const maxDays = 7;
 
-  // Month labels above each week (column)
-  const monthLabels = weeks.map((week, idx) => {
-      const containsFirstOfMonth = week.some(date => {
-      const d = new Date(date);
-      return d.getDate() === 1;
-        })
-
-    const lastDate = week[0];
-    const showLabel = idx === 0 || containsFirstOfMonth;
-    const currentMonth = new Date(lastDate).toLocaleString("default", {
-      month: "short",
-    });
-    return (
-      <div
-        key={lastDate + "-month-label"}
-        className="w-8 text-xs text-center"
-        style={{ visibility: showLabel ? "visible" : "hidden" }}
-      >
-        {currentMonth}
-      </div>
-    );
+// Month labels above each week (column)
+const monthLabels = weeks.map((week, idx) => {
+  // Find the first date in the week that is the 1st of a month
+  const firstOfMonthDate = week.find(date => {
+    const d = parseDateStringLocal(date);
+    return d.getDate() === 1;
   });
+  // Use the 1st of the month if present, otherwise the first date in the week
+  const labelDate = firstOfMonthDate || week[0];
+  // Show label if it's the first column or the week contains the 1st of a month
+  const showLabel = idx === 0 || !!firstOfMonthDate;
+  const currentMonth = parseDateStringLocal(labelDate).toLocaleString("en-US", { month: "short" });
+  return (
+    <div
+      key={labelDate + "-month-label"}
+      className="w-8 text-xs text-center"
+      style={{ visibility: showLabel ? "visible" : "hidden" }}
+    >
+      {currentMonth}
+    </div>
+  );
+});
 
   return (
     <ScrollArea ref={scrollAreaRef} className="w-full h-fit pb-4">
@@ -97,7 +98,7 @@ export const HabitHeatmap = ({
         <div className="flex gap-1 w-fit">
           {weeks.map((week, colIdx) => (
             <div key={colIdx} className="flex flex-col gap-1">
-              {Array.from({ length: maxDays }).map((_, rowIdx) => {
+               {Array.from({ length: maxDays }).map((_, rowIdx) => {
                 const date = week[rowIdx];
                 if (!date) {
                   return <div key={`empty-${colIdx}-${rowIdx}`} className="w-8 h-8" />;
@@ -127,7 +128,7 @@ export const HabitHeatmap = ({
                         : undefined
                     }
                   >
-                    {new Date(date).getDate()}
+                    {parseDateStringLocal(date).getDate()}
                   </div>
                 );
               })}
