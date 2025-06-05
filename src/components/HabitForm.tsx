@@ -23,10 +23,12 @@ type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth
 
 export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
   const [habit, setHabit] = useState<PartialHabit>(
-    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#000000" }
+    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#FF0000" }
   );
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    // Helper to summarize frequency
+
+  // Helper to summarize frequency
   function getFrequencySummary() {
     if (habit.frequencyDays === 1 && habit.target === 1) return "Every day";
     if (habit.frequencyDays && habit.target === 1) return `Every ${habit.frequencyDays} days`;
@@ -74,8 +76,24 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
     }));
   }
 
+  const validate = () => {
+    const newErrors: { [key: string]: string } = {};
+    if (!habit.name.trim()) newErrors.name = "Name is required.";
+    if (habit.type === "measurable") {
+      if (!habit.unit?.trim()) newErrors.unit = "Unit is required.";
+      if (!habit.target || isNaN(habit.target) || habit.target <= 0) newErrors.target = "Target must be a positive number.";
+      if (!habit.frequencyDays) newErrors.frequencyDays = "Frequency is required.";
+    }
+    if (habit.type === "boolean") {
+      if (!habit.frequencyDays) newErrors.frequencyDays = "Frequency is required.";
+    }
+    return newErrors;
+  };
+
   const handleSave = () => {
-    if (habit.name.trim()) {
+    const validationErrors = validate();
+    setErrors(validationErrors);
+    if (Object.keys(validationErrors).length === 0) {
       onSave(habit);
     }
   };
@@ -89,6 +107,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           onChange={(e) => setHabit((prev) => ({ ...prev, name: e.target.value }))}
           placeholder="Habit name"
         />
+        {errors.name && <div className="text-red-500 text-xs mt-1">{errors.name}</div>}
       </div>
       <div>
         <label className="block text-sm font-medium mb-1">Description</label>
@@ -109,7 +128,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="boolean">Yes/No</SelectItem>
-            <SelectItem value="measurable">Numeric</SelectItem>
+            <SelectItem value="measurable">Measurable</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -133,6 +152,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
             <Button variant="outline" onClick={openFrequencyDialog}>
               {getFrequencySummary()}
             </Button>
+            {errors.frequencyDays && <div className="text-red-500 text-xs mt-1">{errors.frequencyDays}</div>}
             <FrequencyDialog
               open={frequencyDialogOpen}
               onOpenChange={setFrequencyDialogOpen}
@@ -147,6 +167,15 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
       {habit.type === "measurable" && (
         <>
           <div>
+            <label className="block text-sm font-medium mb-1">Unit</label>
+            <Input
+              value={habit.unit || ""}
+              onChange={(e) => setHabit((prev) => ({ ...prev, unit: e.target.value }))}
+              placeholder="Unit (e.g., km, minutes)"
+            />
+            {errors.unit && <div className="text-red-500 text-xs mt-1">{errors.unit}</div>}
+          </div>
+          <div>
             <label className="block text-sm font-medium mb-1">Target</label>
             <Input
               type="number"
@@ -159,14 +188,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
               }
               placeholder="Target value"
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Unit</label>
-            <Input
-              value={habit.unit || ""}
-              onChange={(e) => setHabit((prev) => ({ ...prev, unit: e.target.value }))}
-              placeholder="Unit (e.g., km, minutes)"
-            />
+            {errors.target && <div className="text-red-500 text-xs mt-1">{errors.target}</div>}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Frequency</label>
@@ -201,6 +223,7 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
                 <SelectItem value="monthly">Every Month</SelectItem>
               </SelectContent>
             </Select>
+            {errors.frequencyDays && <div className="text-red-500 text-xs mt-1">{errors.frequencyDays}</div>}
           </div>
         </>
       )}
