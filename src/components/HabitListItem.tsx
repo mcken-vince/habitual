@@ -27,7 +27,7 @@ export function HabitListItem({
       <div className="flex flex-row items-center gap-2 border-b py-2">
         <div className="p-2 min-w-30 flex flex-row flex-grow-1" onClick={onClick}>
           <SimplePie percentage={score} color={habit.color}/>
-          <h3 className="text-md font-semibold">{habit.name}</h3>
+          <h3 className="text-sm font-semibold my-auto leading-3.5">{habit.name}</h3>
         </div>
         <div className="grid"
           style={{ gridTemplateColumns: `repeat(${visibleDates.length}, 1fr)` }}>
