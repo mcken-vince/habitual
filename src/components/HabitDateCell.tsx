@@ -1,6 +1,7 @@
 import { Habit } from "@/types";
 import { Button } from "./ui/button";
 import { useEffect, useRef, useState } from "react";
+import { isHabitSatisfiedOnDate } from "@/lib/habitSatisfaction";
 
 interface HabitDateCellProps {
   habit: Habit;
@@ -9,11 +10,24 @@ interface HabitDateCellProps {
 }
 
 export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
-  const isCompleted = habit.history[date];
-  const textColor = isCompleted ? habit.color : "var(--color-gray-200)";
   const [isPressing, setIsPressing] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isCompleted = habit.history[date]
+  const isSatisfied = isHabitSatisfiedOnDate(habit, date)
+  let textColor = "var(--color-gray-200)"
+  let symbol = "✗"
+  let opacity = 1
+
+    if (isCompleted) {
+    textColor = habit.color
+    symbol = "✓"
+    opacity = 1
+  } else if (isSatisfied) {
+    textColor = habit.color
+    symbol = "✓"
+    opacity = 0.4 // Lighten satisfied checkmark
+  }
 
   useEffect(() => {
     if (isPressing) {
@@ -61,8 +75,8 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
         className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit select-none"
       >
         {habit.type === "boolean" ? (
-          <span style={{ color: textColor }} className="text-lg font-bold">
-            {isCompleted ? "✓" : "✗"}
+          <span style={{ color: textColor, opacity }} className="text-lg font-bold">
+            {symbol}
           </span>
         ) : (
           <div
