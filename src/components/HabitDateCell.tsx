@@ -72,7 +72,11 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
         onTouchStart={startPress}
         onTouchEnd={endPress}
         variant="ghost"
-        className="w-10 h-10 flex items-center justify-center rounded-md bg-transparent hover:bg-inherit select-none"
+        className="flex items-center justify-center rounded-md bg-transparent hover:bg-inherit select-none"
+        style={{
+          width: "var(--date-cell-width)",
+          height: "var(--date-cell-width)",
+        }}
       >
         {habit.type === "boolean" ? (
           <span style={{ color: textColor, opacity }} className="text-lg font-bold">
