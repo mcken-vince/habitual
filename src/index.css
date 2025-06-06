@@ -136,3 +136,19 @@
     --chart-5: 340 75% 55%;
   }
 }
+
+:root {
+  /* ...existing code... */
+  --date-cell-width: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --date-cell-width: 3rem;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --date-cell-width: 3.5rem;
+  }
+}
