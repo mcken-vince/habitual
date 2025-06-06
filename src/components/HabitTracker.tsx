@@ -142,19 +142,24 @@ function HabitTracker() {
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
         <div className="grid items-center"
-          style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, 1fr)` }}
+          style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, var(--date-cell-width))` }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}>
           {visibleDates.map((date) => (
-            <div key={date} className="flex align-center justify-center w-10">
-              <div className="max-w-7 text-center text-sm font-medium">
-                {
-                  // Use date utils for parsing and display
-                  (() => {
+            <div key={date} className="flex align-center justify-center w-full">
+              <div className="text-center text-sm font-medium">
+                {/* // Use date utils for parsing and display */}
+                <p>{(() => {
+                  const d = parseDateStringLocal(date);
+                  return d.toLocaleDateString(undefined, { month: "short" });
+                })()}</p>
+                <p>
+                  {(() => {
                     const d = parseDateStringLocal(date);
-                    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-                  })()
-                }
+                    return d.getDate();
+                  })()}
+                </p>
+
               </div>
             </div>
           ))}
