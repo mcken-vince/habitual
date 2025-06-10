@@ -11,13 +11,15 @@ import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
 import { FrequencyProgressBarChart } from "./FrequencyProgressBarChart";
 import { HabitHistoryBarChart } from "./HabitHistoryBarChart";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { SimplePie } from "./SimplePie";
 
 interface HabitViewProps {
   habit: Habit;
   isOpen: boolean;
   onClose: () => void;
   onUpdateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
-    onDeleteHabit: (id: string) => void;
+  onDeleteHabit: (id: string) => void;
 }
 
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit }: HabitViewProps) => {
@@ -45,7 +47,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
       };
     });
   }, [habit, allDates]);
-  
+
   return (
     <Sheet open={isOpen && !!habit} modal={true}>
       <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto [&>button:first-of-type]:hidden">
@@ -87,50 +89,63 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
             />
           ) : (
             <>
-              <div>
-                <p className="text-sm font-medium">Score:</p>
-                <p>{score.toFixed(1)}%</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Description:</p>
-                <p>{habit.description}</p>
-              </div>
-              {habit.type === "boolean" && habit.target && habit.frequencyDays && (
-                <div>
-                  <p className="text-sm font-medium">Frequency:</p>
-                  <p>{habit.target} times every {habit.frequencyDays} days</p>
-                </div>
-              )}
-              {habit.type === "measurable" && (
-                <div>
-                  <p className="text-sm font-medium">Frequency:</p>
-                  <p>
-                    {habit.target} {habit.unit} every {habit.frequencyDays === 1 ? 'day' : `${habit.frequencyDays ?? '0'} days`}
-                  </p>
-                </div>
-              )}
+              <Card>
+                <CardHeader><CardTitle>Overview</CardTitle></CardHeader>
+                <CardContent className="flex gap-4">
+                  <SimplePie
+                    percentage={score}
+                    color={habit.color}
+                    size={50}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">Score:</p>
+                    <p>{score.toFixed(1)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Description:</p>
+                    <p>{habit.description}</p>
+                  </div>
+                  {habit.type === "boolean" && habit.target && habit.frequencyDays && (
+                    <div>
+                      <p className="text-sm font-medium">Frequency:</p>
+                      <p>{habit.target} times every {habit.frequencyDays} days</p>
+                    </div>
+                  )}
+                  {habit.type === "measurable" && (
+                    <div className="">
+                      <p className="text-sm font-medium">Frequency:</p>
+                      <p>
+                        {habit.target} {habit.unit} every {habit.frequencyDays === 1 ? 'day' : `${habit.frequencyDays ?? '0'} days`}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               <FrequencyProgressBarChart habit={habit} />
+
               <InteractiveLineChart data={scoreHistory} color={habit.color} />
+
+              <HabitHistoryBarChart habit={habit} />
+
+              <HabitHeatmap
+                habit={habit}
+                dates={allDates}
+                editable={isEditing}
+                onDateClick={
+                  isEditing
+                    ? (date) => {
+                      if (habit.type === "boolean") {
+                        onUpdateHabit(habit.id, { ...habit, history: { ...habit.history, [date]: habit.history[date] ? 0 : 1 } });
+                      } else {
+                        setEditDate(date)
+                      }
+                    }
+                    : undefined
+                }
+              />
             </>
           )}
-          <HabitHistoryBarChart habit={habit} />
-          {/* Pass all dates to the HabitHeatmap */}
-          <HabitHeatmap
-            habit={habit}
-            dates={allDates}
-            editable={isEditing}
-            onDateClick={
-              isEditing
-                ? (date) => {
-                  if (habit.type === "boolean") {
-                    onUpdateHabit(habit.id, { ...habit, history: { ...habit.history, [date]: habit.history[date] ? 0 : 1 } });
-                  } else {
-                    setEditDate(date)
-                  }
-                }
-                : undefined
-            }
-          />
           <UpdateHabitDialog
             habit={habit}
             date={editDate}
