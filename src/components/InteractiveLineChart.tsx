@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
   ChartConfig,
@@ -47,7 +48,8 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b sm:flex-row">
+      <CardHeader className="flex items-center gap-2 space-y-0 sm:flex-row">
+        <CardTitle>Score</CardTitle>
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
             className="w-[160px] rounded-lg sm:ml-auto"
@@ -141,7 +143,7 @@ export function InteractiveLineChart({ data, color }: InteractiveLineChartProps)
                     })
                   }}
                   indicator="dot"
-                  />
+                />
               }
             />
             {/* <Area
