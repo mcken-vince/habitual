@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Habit } from "@/types"
 import { MiniBar } from "./MiniBar"
 import { parseDateStringLocal } from "@/lib/dates"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 type Grouping = "week" | "month" | "quarter" | "year"
 
@@ -159,9 +160,9 @@ export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
   );
 
   return (
-    <div className="w-full h-64 mb-8">
-      <div className="flex w-full justify-between items-center mb-2">
-        <span className="text-md font-medium">History</span>
+    <Card>
+      <CardHeader className="flex w-full justify-between items-center mb-2">
+        <CardTitle>History</CardTitle>
         <Select value={grouping} onValueChange={v => setGrouping(v as Grouping)}>
           <SelectTrigger className="w-32">
             <SelectValue />
@@ -173,44 +174,41 @@ export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
             <SelectItem value="year">Year</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-
-      <div className="flex flex-row items-end h-50 mt-4 pb-2 relative">
-        {/* Y Axis grid lines */}
-        <div className="absolute left-0 top-0 w-full h-48 z-0 pointer-events-none">
-          {yAxisLabels.map((_label, i) => (
-            <div
-              key={i}
-              className="flex items-center absolute left-0 w-full"
-              style={{
-                top: `${(100 / yTicks) * i}%`,
-                height: 0,
-              }}
-            >
-              <div className="w-full border-t border-solid border-gray-200 " />
-              {/* <span
-                className="absolute -left-7 text-[10px] text-gray-400 select-none bg-white pr-1"
-                style={{ transform: "translateY(-50%)" }}
-              >
-                {label}
-              </span> */}
+      </CardHeader>
+      <CardContent>
+        <div className="w-full h-45 mb-8">
+          <div className="flex flex-row items-end h-50 mt-4 pb-2 relative">
+            {/* Y Axis grid lines */}
+            <div className="absolute left-0 top-0 w-full h-48 z-0 pointer-events-none">
+              {yAxisLabels.map((_label, i) => (
+                <div
+                  key={i}
+                  className="flex items-center absolute left-0 w-full"
+                  style={{
+                    top: `${(100 / yTicks) * i}%`,
+                    height: 0,
+                  }}
+                >
+                  <div className="w-full border-t border-solid border-gray-200 " />
+                </div>
+              ))}
             </div>
-          ))}
+            {/* Bars */}
+            <div className="flex w-full justify-end items-end h-38 ml-4 z-10">
+              {data.map((entry) => (
+                <MiniBar
+                  key={entry.key}
+                  value={entry.completions}
+                  max={maxCompletions}
+                  label={entry.period}
+                  width="w-3"
+                  color={habit.color}
+                />
+              ))}
+            </div>
+          </div>
         </div>
-        {/* Bars */}
-        <div className="flex w-full justify-end items-end h-38 ml-4 z-10">
-          {data.map((entry) => (
-            <MiniBar
-              key={entry.key}
-              value={entry.completions}
-              max={maxCompletions}
-              label={entry.period}
-              width="w-3"
-              color={habit.color}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }
