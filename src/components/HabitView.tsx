@@ -11,8 +11,7 @@ import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
 import { FrequencyProgressBarChart } from "./FrequencyProgressBarChart";
 import { HabitHistoryBarChart } from "./HabitHistoryBarChart";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { SimplePie } from "./SimplePie";
+import { HabitOverview } from "./HabitOverview";
 
 interface HabitViewProps {
   habit: Habit;
@@ -27,8 +26,6 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
   const [editDate, setEditDate] = useState<string | null>(null);
 
   const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
-
-  const score = calculateHabitScore(habit); // Calculate the score
 
   const scoreHistory = useMemo(() => {
     return allDates.map((date, idx) => {
@@ -89,38 +86,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
             />
           ) : (
             <>
-              <Card>
-                <CardHeader><CardTitle>Overview</CardTitle></CardHeader>
-                <CardContent className="flex gap-4">
-                  <SimplePie
-                    percentage={score}
-                    color={habit.color}
-                    size={50}
-                  />
-                  <div>
-                    <p className="text-sm font-medium">Score:</p>
-                    <p>{score.toFixed(1)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">Description:</p>
-                    <p>{habit.description}</p>
-                  </div>
-                  {habit.type === "boolean" && habit.target && habit.frequencyDays && (
-                    <div>
-                      <p className="text-sm font-medium">Frequency:</p>
-                      <p>{habit.target} times every {habit.frequencyDays} days</p>
-                    </div>
-                  )}
-                  {habit.type === "measurable" && (
-                    <div className="">
-                      <p className="text-sm font-medium">Frequency:</p>
-                      <p>
-                        {habit.target} {habit.unit} every {habit.frequencyDays === 1 ? 'day' : `${habit.frequencyDays ?? '0'} days`}
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <HabitOverview habit={habit} />
 
               <FrequencyProgressBarChart habit={habit} />
 
