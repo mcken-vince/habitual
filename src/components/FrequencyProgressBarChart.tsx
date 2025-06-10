@@ -1,6 +1,7 @@
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Habit } from "@/types"
 import { addAlpha } from "@/lib/color"
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 
 function getPeriodRange(period: "week" | "month" | "quarter" | "year") {
   const now = new Date()
@@ -48,13 +49,13 @@ function getProgress(habit: Habit, period: "week" | "month" | "quarter" | "year"
     total += habit.history[key] || 0
     days++
   }
-    let target = habit.target / (habit.frequencyDays ?? 1) * days
-    if (habit.type === 'boolean') {
-      // Clamp boolean habit target to not exceed days in period
-      target = Math.min(target, days)
-    }
+  let target = habit.target / (habit.frequencyDays ?? 1) * days
+  if (habit.type === 'boolean') {
+    // Clamp boolean habit target to not exceed days in period
+    target = Math.min(target, days)
+  }
 
-    return { value: total, target: Math.round(target) } 
+  return { value: total, target: Math.round(target) }
 }
 
 export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
@@ -65,7 +66,7 @@ export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
     { key: "year", label: "This Year" },
   ] as const
 
-  const data: {name: string, value: number, target: number, percent: number}[] = periods.map(({ key, label }) => {
+  const data: { name: string, value: number, target: number, percent: number }[] = periods.map(({ key, label }) => {
     const { value, target } = getProgress(habit, key)
     return {
       name: label,
@@ -76,24 +77,31 @@ export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
   })
 
   return (
-    <div className="w-full h-48">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          layout="vertical"
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis type="number" domain={[0, 100]} hide />
-          <YAxis dataKey="name" type="category" width={100} />
-          <Tooltip 
-            formatter={(_, __, props) => [
-              `${props.payload.value} / ${props.payload.target}`,
-              "Progress"
-            ]}
-          />
-          <Bar dataKey="percent" fill={addAlpha(habit.color, 0.7)} background />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Target</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="w-full h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              layout="vertical"
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 100]} hide />
+              <YAxis dataKey="name" type="category" width={100} />
+              <Tooltip
+                formatter={(_, __, props) => [
+                  `${props.payload.value} / ${props.payload.target}`,
+                  "Progress"
+                ]}
+              />
+              <Bar dataKey="percent" fill={addAlpha(habit.color, 0.7)} background />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
