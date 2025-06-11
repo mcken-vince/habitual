@@ -6,16 +6,18 @@ import { HabitListItem } from "./HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
 import { HabitView } from "./HabitView";
 import { HabitForm } from "./HabitForm";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Settings2Icon } from "lucide-react";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
+import { Settings } from "./Settings";
 
 function HabitTracker() {
   const { habits, addHabit, updateHabit, deleteHabit, updateCompletion } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [habitFormOpen, setHabitFormOpen] = useState(false);
-  const [visibleDatesCount, setVisibleDatesCount] = useState(5);
+  const [habitFormOpen, setHabitFormOpen] = useState<boolean>(false);
+  const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
+  const [visibleDatesCount, setVisibleDatesCount] = useState<number>(5);
   const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartX = useRef<number | null>(null);
 
   // Dynamically adjust visibleDateCount based on screen width
@@ -115,29 +117,35 @@ function HabitTracker() {
       {/* Header */}
       <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm">
         <h1 className="text-2xl font-bold">Habitual</h1>
-        <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
-          <SheetTrigger asChild>
-            <Button><PlusIcon /></Button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-full p-4">
-            <SheetHeader>
-              <SheetTitle>Create Habit</SheetTitle>
-            </SheetHeader>
-            <HabitForm
-              onSave={(habit) => {
-                addHabit({
-                  id: Date.now().toString(),
-                  ...habit,
-                  history: {},
-                  createdAt: new Date().toISOString(),
-                });
-                setHabitFormOpen(false);
-              }}
-              onCancel={() => setHabitFormOpen(false)}
-            />
-          </SheetContent>
-        </Sheet>
+        <div className="flex flex-row gap-2">
+          <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
+            <SheetTrigger asChild>
+              <Button><PlusIcon /></Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-full p-4">
+              <SheetHeader>
+                <SheetTitle>Create Habit</SheetTitle>
+              </SheetHeader>
+              <HabitForm
+                onSave={(habit) => {
+                  addHabit({
+                    id: Date.now().toString(),
+                    ...habit,
+                    history: {},
+                    createdAt: new Date().toISOString(),
+                  });
+                  setHabitFormOpen(false);
+                }}
+                onCancel={() => setHabitFormOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+          <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
+            <Settings2Icon />
+          </Button>
+        </div>
       </header>
+      <Settings open={settingsOpen} onClose={(value) => setSettingsOpen(value)} />
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
