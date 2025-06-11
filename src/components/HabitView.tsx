@@ -47,7 +47,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
   return (
     <Sheet open={isOpen && !!habit} modal={true}>
-      <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto [&>button:first-of-type]:hidden">
+      <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto" hideCloseButton>
         <SheetHeader >
           <SheetTitle className="flex flex-row items-center w-full justify-between">
             <div className="flex flex-row items-center gap-2">
