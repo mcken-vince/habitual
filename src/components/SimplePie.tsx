@@ -4,7 +4,7 @@ import {
   ChartContainer,
 } from "@/components/ui/chart"
 
-interface SimplePieProps { percentage: number, color: string, size: string | number };
+interface SimplePieProps { percentage: number, color: string, size?: string | number };
 
 export function SimplePie({ percentage = 0, color, size = '32px' }: SimplePieProps) {
   const chartConfig = {
