@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 export interface Settings {
-  // Add your settings fields here
   theme?: "light" | "dark";
   notificationsEnabled?: boolean;
+  startDayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.
 }
 
 interface SettingsContextType {
@@ -15,6 +15,7 @@ interface SettingsContextType {
 const defaultSettings: Settings = {
   theme: "light",
   notificationsEnabled: true,
+  startDayOfWeek: 0,
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
