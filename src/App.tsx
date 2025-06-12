@@ -1,13 +1,16 @@
 import './App.css'
 import HabitTracker from './components/HabitTracker'
 import { HabitsProvider } from './hooks/useHabits'
+import { SettingsProvider } from './hooks/useSettings'
 
 function App() {
 
   return (
-    <HabitsProvider>
-      <HabitTracker />
-    </HabitsProvider>
+    <SettingsProvider>
+      <HabitsProvider>
+        <HabitTracker />
+      </HabitsProvider>
+    </SettingsProvider>
   )
 }
 
