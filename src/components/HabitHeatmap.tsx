@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { addAlpha, isColorDark } from "@/lib/color";
 import { toDateStringLocal, parseDateStringLocal } from "@/lib/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useSettings } from "@/hooks/useSettings";
 
 interface HabitHeatmapProps {
   habit: Habit;
@@ -12,18 +13,21 @@ interface HabitHeatmapProps {
   onDateClick?: (date: string, value: number) => void;
 }
 
-function padDatesToSunday(dates: string[]) {
+function padDatesToWeekStart(dates: string[], startDayOfWeek: number) {
   if (dates.length === 0) return [];
   const firstDate = parseDateStringLocal(dates[0]);
-  const dayOfWeek = firstDate.getDay(); // 0 = Sunday
+  const dayOfWeek = firstDate.getDay();
+  // Calculate how many days to pad before the first date
+  const pad = (dayOfWeek - startDayOfWeek + 7) % 7;
   const paddedDates = [...dates];
-  for (let i = 1; i <= dayOfWeek; i++) {
+  for (let i = 1; i <= pad; i++) {
     const d = new Date(firstDate);
     d.setDate(firstDate.getDate() - i);
     paddedDates.unshift(toDateStringLocal(d));
   }
   return paddedDates;
 }
+
 
 function groupDatesByWeek(dates: string[]) {
   const weeks: string[][] = [];
@@ -39,7 +43,10 @@ export const HabitHeatmap = ({
   editable = false,
   onDateClick
 }: HabitHeatmapProps) => {
+  const { settings } = useSettings();
+  const startDayOfWeek = settings.startDayOfWeek ?? 0;
   const getColorIntensity = (value: number): string => {
+    
     const color = habit.color;
     if (value === 0) return "var(--color-gray-200)"; // No completion
     if (value < habit.target! / 2) return addAlpha(color, 0.3); // Less than half completion
@@ -58,8 +65,8 @@ export const HabitHeatmap = ({
     }
   }, []);
 
-  // Pad dates so the first column starts on a Sunday
-  const paddedDates = padDatesToSunday(dates);
+  // Pad dates so the first column starts on the user's preferred start day
+  const paddedDates = padDatesToWeekStart(dates, startDayOfWeek);
 
   // Group dates into weeks (columns)
   const weeks = groupDatesByWeek(paddedDates);
