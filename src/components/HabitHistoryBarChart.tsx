@@ -4,6 +4,7 @@ import { Habit } from "@/types"
 import { MiniBar } from "./MiniBar"
 import { parseDateStringLocal } from "@/lib/dates"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { useSettings } from "@/hooks/useSettings"
 
 type Grouping = "week" | "month" | "quarter" | "year"
 
@@ -41,40 +42,37 @@ function getPeriodLabel(key: string, grouping: Grouping) {
   return key
 }
 
-function getFirstDayOfISOWeek(year: number, week: number) {
-  // ISO week: Monday is the first day of the week
-  const simple = new Date(year, 0, 1 + (week - 1) * 7);
-  const dow = simple.getDay();
-  const ISOweekStart = new Date(simple);
-  if (dow <= 4)
-    ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-  else
-    ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
-  return ISOweekStart;
+function getFirstDayOfWeek(year: number, week: number, startDayOfWeek: number) {
+  // Calculate the first day of the given week number, using the user's preferred start day
+  const jan1 = new Date(year, 0, 1);
+  const jan1Day = jan1.getDay();
+  const daysOffset = (startDayOfWeek - jan1Day + 7) % 7;
+  const firstWeekStart = new Date(jan1);
+  firstWeekStart.setDate(jan1.getDate() + daysOffset);
+  const weekStart = new Date(firstWeekStart);
+  weekStart.setDate(firstWeekStart.getDate() + (week - 1) * 7);
+  return weekStart;
 }
 
-function getWeekLabel(key: string, prevKey: string | null) {
+function getWeekLabel(key: string, prevKey: string | null, startDayOfWeek: number) {
   // key: "YYYY-Wn"
   const [yearStr, weekStr] = key.split("-W");
   const year = Number(yearStr);
   const week = Number(weekStr);
-  const firstDay = getFirstDayOfISOWeek(year, week);
+  const firstDay = getFirstDayOfWeek(year, week, startDayOfWeek);
   if (!prevKey) {
-    // Always show month+year for the first bar
-    return `${firstDay.toLocaleString("default", { month: "short" })} '${String(year).slice(-2)}`
+    return `${firstDay.toLocaleString("default", { month: "short" })} '${String(year).slice(-2)}`;
   }
-  const [prevYearStr, prevWeekStr] = prevKey.split("-W")
+  const [prevYearStr, prevWeekStr] = prevKey.split("-W");
   const prevYear = Number(prevYearStr);
   const prevWeek = Number(prevWeekStr);
-  const prevFirstDay = getFirstDayOfISOWeek(prevYear, prevWeek)
+  const prevFirstDay = getFirstDayOfWeek(prevYear, prevWeek, startDayOfWeek);
   if (
     firstDay.getMonth() !== prevFirstDay.getMonth() ||
     firstDay.getFullYear() !== prevFirstDay.getFullYear()
   ) {
-    // First week of a new month
     return `${firstDay.toLocaleString("default", { month: "short" })} '${String(year).slice(-2)}`;
   }
-  // Otherwise, show the date of the first day of the week
   return firstDay.toLocaleDateString(undefined, { day: "numeric" });
 }
 
@@ -123,6 +121,8 @@ function getAllPeriodKeys(habit: Habit, grouping: Grouping) {
 
 export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
   const [grouping, setGrouping] = useState<Grouping>("week");
+  const { settings } = useSettings();
+  const startDayOfWeek = settings.startDayOfWeek ?? 0;
 
   const data = useMemo(() => {
     const counts: Record<string, number> = {}
@@ -143,7 +143,7 @@ export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
       let label = getPeriodLabel(key, grouping);
       if (grouping === "week") {
         const prevKey = idx > 0 ? sortedKeys[idx - 1] : null
-        label = getWeekLabel(key, prevKey)
+        label = getWeekLabel(key, prevKey, startDayOfWeek)
       }
       return {
         period: label,
