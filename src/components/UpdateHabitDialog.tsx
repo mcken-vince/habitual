@@ -1,8 +1,9 @@
 import { Habit } from "@/types";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
+import { CheckIcon, XIcon } from "lucide-react";
 
 interface UpdateHabitDialogProps {
   habit: Habit;
@@ -31,23 +32,23 @@ export function UpdateHabitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Update Habit</DialogTitle>
-        </DialogHeader>
+
+      <DialogContent className="flex flex-col items-center w-fit min-w-xs">
+        <DialogTitle>{date}</DialogTitle>
         {habit.type === "boolean" ? (
-          <Button
-            onClick={() => {
-              onSave(habit.history[date] ? 0 : 1);
-              onClose();
-            }}
-            variant={habit.history[date] ? "secondary" : "default"}
-          >
-            {habit.history[date] ? "Mark as Incomplete" : "Mark as Complete"}
-          </Button>
+          <div className="flex align-items gap-2">
+          
+          <Button onClick={() => {
+            onSave(1);
+            onClose();
+          }} className="w-15"><CheckIcon /></Button>
+          <Button variant="secondary" onClick={() => {
+            onSave(0);
+            onClose();
+          }} className="w-15"><XIcon /></Button>
+          </div>
         ) : (
-          <div className="space-y-4">
-            <label className="block text-sm font-medium">Value</label>
+          <div className="flex align-items gap-2">
             <Input
               type="number"
               value={numericValue}
