@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
-import { HabitHeatmap } from "./HabitHeatmap";
+import { HabitCalendar } from "./HabitCalendar";
 import { HabitForm } from "./HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
 import { InteractiveLineChart } from "./InteractiveLineChart";
@@ -94,7 +94,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
               <HabitHistoryBarChart habit={habit} />
 
-              <HabitHeatmap
+              <HabitCalendar
                 habit={habit}
                 dates={allDates}
                 editable={isEditing}

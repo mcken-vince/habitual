@@ -6,7 +6,7 @@ import { toDateStringLocal, parseDateStringLocal } from "@/lib/dates";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { useSettings } from "@/hooks/useSettings";
 
-interface HabitHeatmapProps {
+interface HabitCalendarProps {
   habit: Habit;
   dates: string[];
   editable?: boolean;
@@ -37,12 +37,12 @@ function groupDatesByWeek(dates: string[]) {
   return weeks;
 }
 
-export const HabitHeatmap = ({
+export const HabitCalendar = ({
   habit,
   dates,
   editable = false,
   onDateClick
-}: HabitHeatmapProps) => {
+}: HabitCalendarProps) => {
   const { settings } = useSettings();
   const startDayOfWeek = settings.startDayOfWeek ?? 0;
   const getColorIntensity = (value: number): string => {
