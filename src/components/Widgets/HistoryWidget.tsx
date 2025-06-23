@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Habit } from "@/types"
-import { MiniBar } from "./MiniBar"
+import { MiniBar } from "@/components/MiniBar"
 import { parseDateStringLocal } from "@/lib/dates"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings } from "@/hooks/useSettings"
 
 type Grouping = "week" | "month" | "quarter" | "year"
@@ -119,7 +119,7 @@ function getAllPeriodKeys(habit: Habit, grouping: Grouping) {
   return keys;
 }
 
-export function HabitHistoryBarChart({ habit }: { habit: Habit }) {
+export function HistoryWidget({ habit }: { habit: Habit }) {
   const [grouping, setGrouping] = useState<Grouping>("week");
   const { settings } = useSettings();
   const startDayOfWeek = settings.startDayOfWeek ?? 0;
