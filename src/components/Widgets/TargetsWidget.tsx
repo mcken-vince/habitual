@@ -1,7 +1,7 @@
 import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Habit } from "@/types"
 import { addAlpha } from "@/lib/color"
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings } from "@/hooks/useSettings"
 
 function getPeriodRange(period: "week" | "month" | "quarter" | "year", startDayOfWeek: number = 0) {
@@ -61,7 +61,7 @@ function getProgress(habit: Habit, period: "week" | "month" | "quarter" | "year"
   return { value: total, target: Math.round(target) }
 }
 
-export function FrequencyProgressBarChart({ habit }: { habit: Habit }) {
+export function TargetsWidget({ habit }: { habit: Habit }) {
   const { settings } = useSettings();
   const startDayOfWeek = settings.startDayOfWeek ?? 0;
   const periods = [
