@@ -6,10 +6,9 @@ import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { HabitCalendar } from "./HabitCalendar";
 import { HabitForm } from "./HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
-import { InteractiveLineChart } from "./InteractiveLineChart";
 import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
-import { OverviewWidget, TargetsWidget } from "./Widgets";
+import { OverviewWidget, TargetsWidget, ScoreWidget } from "./Widgets";
 import { HabitHistoryBarChart } from "./HabitHistoryBarChart";
 
 interface HabitViewProps {
@@ -89,7 +88,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
               <TargetsWidget habit={habit} />
 
-              <InteractiveLineChart data={scoreHistory} color={habit.color} />
+              <ScoreWidget data={scoreHistory} color={habit.color} />
 
               <HabitHistoryBarChart habit={habit} />
 

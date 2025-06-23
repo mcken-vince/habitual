@@ -29,12 +29,12 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface InteractiveLineChartProps {
+interface ScoreWidgetProps {
   data: { date: string; value: number; }[];
   color: string;
 };
 
-export function InteractiveLineChart({ data, color }: InteractiveLineChartProps) {
+export function ScoreWidget({ data, color }: ScoreWidgetProps) {
   const [timeRange, setTimeRange] = useState("90d");
 
   const filteredData = data.filter((item) => {
