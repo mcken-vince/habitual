@@ -74,16 +74,14 @@ export const HabitCalendar = ({
 
   // Month labels above each week (column)
   const monthLabels = weeks.map((week, idx) => {
-    // Find the first date in the week that is the 1st of a month
-    const firstOfMonthDate = week.find(date => {
-      const d = parseDateStringLocal(date);
-      return d.getDate() === 1;
-    });
-    // Use the 1st of the month if present, otherwise the first date in the week
-    const labelDate = firstOfMonthDate || week[0];
-    // Show label if it's the first column or the week contains the 1st of a month
-    const showLabel = idx === 0 || !!firstOfMonthDate;
-    const currentMonth = parseDateStringLocal(labelDate).toLocaleString("en-US", { month: "short" });
+
+    const firstDayOfWeek = parseDateStringLocal(week[0]);
+    const firstDayIsNewMonth = firstDayOfWeek.getDate() < 8; // Check if the first day is in the first week of the month
+
+    const labelDate = firstDayOfWeek;
+    // Show label when the first day of the week starts a new month
+    const showLabel = idx === 0 || firstDayIsNewMonth;
+    const currentMonth = firstDayOfWeek.toLocaleString("en-US", { month: "short" });
     return (
       <div
         key={labelDate + "-month-label"}
@@ -102,7 +100,7 @@ export const HabitCalendar = ({
         <ScrollArea ref={scrollAreaRef} className="w-full h-fit pb-4">
           <div className="flex flex-col">
             {/* Month labels */}
-            <div className="flex gap-1 mb-1 ml-8 select-none">
+            <div className="flex gap-1 mb-1 select-none">
               {monthLabels}
             </div>
             {/* Heatmap grid */}
