@@ -36,7 +36,10 @@ export function HabitListItem({
               key={date}
               habit={habit}
               date={date}
-              onClick={() => {
+              onPress={() => {
+                setSelectedDate(date);
+              }}
+              onLongPress={() => {
                 if (habit.type === "boolean") {
                   const isCompleted = habit.history[date];
                   updateCompletion(habit.id, date, isCompleted ? 0 : 1);

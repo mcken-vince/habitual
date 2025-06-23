@@ -6,10 +6,11 @@ import { isHabitSatisfiedOnDate } from "@/lib/habitSatisfaction";
 interface HabitDateCellProps {
   habit: Habit;
   date: string;
-  onClick: () => void;
+  onPress: () => void;
+  onLongPress: () => void;
 }
 
-export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
+export const HabitDateCell = ({ habit, date, onPress, onLongPress }: HabitDateCellProps) => {
   const [isPressing, setIsPressing] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -19,7 +20,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
   let symbol = "✗"
   let opacity = 1
 
-    if (isCompleted) {
+  if (isCompleted) {
     textColor = habit.color
     symbol = "✓"
     opacity = 1
@@ -33,7 +34,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
     if (isPressing) {
       timerRef.current = setTimeout(() => {
         setLongPressTriggered(true);
-        onClick();
+        onLongPress();
       }, 500);
     } else {
       if (timerRef.current) {
@@ -48,7 +49,7 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
         timerRef.current = null;
       }
     };
-  }, [isPressing, onClick]);
+  }, [isPressing, onLongPress]);
 
   const startPress = () => {
     setLongPressTriggered(false);
@@ -56,19 +57,19 @@ export const HabitDateCell = ({ habit, date, onClick }: HabitDateCellProps) => {
   };
 
   const endPress = (e?: React.SyntheticEvent) => {
-    setIsPressing(false);
-    if (longPressTriggered && e) {
-      e.preventDefault();
-      e.stopPropagation();
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!longPressTriggered) {
+      onPress();
     }
+    setIsPressing(false);
   };
 
   return (
     <div key={date} className="flex flex-col items-center no-select">
       <Button
-        onPointerDown={startPress}
-        onPointerUp={endPress}
-        onPointerLeave={endPress}
+        onMouseDown={startPress}
+        onMouseUp={endPress}
         onTouchStart={startPress}
         onTouchEnd={endPress}
         variant="ghost"
