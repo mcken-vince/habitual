@@ -1,12 +1,12 @@
 import { Habit } from "@/types";
-import { ScrollArea, ScrollBar } from "./ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useEffect, useRef } from "react";
 import { addAlpha, isColorDark } from "@/lib/color";
 import { toDateStringLocal, parseDateStringLocal } from "@/lib/dates";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/useSettings";
 
-interface HabitCalendarProps {
+interface CalendarWidgetProps {
   habit: Habit;
   dates: string[];
   editable?: boolean;
@@ -37,12 +37,12 @@ function groupDatesByWeek(dates: string[]) {
   return weeks;
 }
 
-export const HabitCalendar = ({
+export const CalendarWidget = ({
   habit,
   dates,
   editable = false,
   onDateClick
-}: HabitCalendarProps) => {
+}: CalendarWidgetProps) => {
   const { settings } = useSettings();
   const startDayOfWeek = settings.startDayOfWeek ?? 0;
   const getColorIntensity = (value: number): string => {

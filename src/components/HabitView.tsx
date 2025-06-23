@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button";
 import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
-import { HabitCalendar } from "./HabitCalendar";
 import { HabitForm } from "@/components/HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
 import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "@/components/UpdateHabitDialog";
-import { OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget } from "@/components/Widgets";
+import { OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
 
 interface HabitViewProps {
   habit: Habit;
@@ -91,7 +90,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
               <HistoryWidget habit={habit} />
 
-              <HabitCalendar
+              <CalendarWidget
                 habit={habit}
                 dates={allDates}
                 editable={isEditing}
