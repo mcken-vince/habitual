@@ -1,9 +1,9 @@
 import { Habit } from "@/types";
-import { SimplePie } from "./SimplePie";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { SimplePie } from "@/components/SimplePie";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateHabitScore } from "@/lib/scoring";
 
-export const HabitOverview = ({ habit }: { habit: Habit }) => {
+export const OverviewWidget = ({ habit }: { habit: Habit }) => {
   const score = calculateHabitScore(habit);
   return (
     <Card>

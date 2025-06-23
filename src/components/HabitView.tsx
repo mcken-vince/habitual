@@ -9,9 +9,8 @@ import { calculateHabitScore } from "@/lib/scoring";
 import { InteractiveLineChart } from "./InteractiveLineChart";
 import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
-import { TargetsWidget } from "./Widgets/TargetsWidget";
+import { OverviewWidget, TargetsWidget } from "./Widgets";
 import { HabitHistoryBarChart } from "./HabitHistoryBarChart";
-import { HabitOverview } from "./HabitOverview";
 
 interface HabitViewProps {
   habit: Habit;
@@ -86,7 +85,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
             />
           ) : (
             <>
-              <HabitOverview habit={habit} />
+              <OverviewWidget habit={habit} />
 
               <TargetsWidget habit={habit} />
 
