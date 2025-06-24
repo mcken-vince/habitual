@@ -1,5 +1,5 @@
 import { Habit } from "@/types"
-import { parseDateStringLocal } from "@/lib/dates"
+import { parseDateStringLocal } from "./dates"
 
 // Returns true if the habit is satisfied for the given date
 export function isHabitSatisfiedOnDate(habit: Habit, date: string): boolean {
