@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { HabitListItem } from "./HabitListItem";
+import { HabitListItem } from "@/components/HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
-import { HabitView } from "./HabitView";
-import { HabitForm } from "./HabitForm";
-import { PlusIcon, Settings2Icon } from "lucide-react";
+import { HabitView } from "@/components/HabitView";
+import { HabitForm } from "@/components/HabitForm";
+import { PlusIcon, Settings2Icon, CheckIcon, ArrowLeftIcon } from "lucide-react";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
-import { Settings } from "./Settings";
+import { Settings } from "@/components/Settings";
 
 function HabitTracker() {
   const { habits, addHabit, updateHabit, deleteHabit, updateCompletion } = useHabits();
@@ -19,6 +19,7 @@ function HabitTracker() {
   const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartX = useRef<number | null>(null);
+  const habitFormRef = useRef<{ save: () => void }>(null);
 
   // Dynamically adjust visibleDateCount based on screen width
   useEffect(() => {
@@ -122,11 +123,35 @@ function HabitTracker() {
             <SheetTrigger asChild>
               <Button><PlusIcon /></Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-full p-4">
+            <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
               <SheetHeader>
-                <SheetTitle>Create Habit</SheetTitle>
+                <SheetTitle className="flex flex-row items-center w-full justify-between">
+                  <div className="flex flex-row items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setHabitFormOpen(false)}
+                      className="p-2"
+                    >
+                      <ArrowLeftIcon className="w-5 h-5" />
+                    </Button>
+                    <span>New Habit</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      if (habitFormRef.current) {
+                        habitFormRef.current.save();
+                      }
+                    }}
+                    className="p-2"
+                  >
+                    <CheckIcon className="w-5 h-5" />
+                  </Button>
+                </SheetTitle>
               </SheetHeader>
               <HabitForm
+                ref={habitFormRef}
                 onSave={(habit) => {
                   addHabit({
                     id: Date.now().toString(),
@@ -136,7 +161,6 @@ function HabitTracker() {
                   });
                   setHabitFormOpen(false);
                 }}
-                onCancel={() => setHabitFormOpen(false)}
               />
             </SheetContent>
           </Sheet>

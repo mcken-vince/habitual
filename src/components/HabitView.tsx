@@ -1,8 +1,8 @@
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
+import { ArrowLeftIcon, EditIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
 import { HabitForm } from "@/components/HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
 import { getDatesInRange } from "@/lib/dates";
@@ -20,6 +20,7 @@ interface HabitViewProps {
 export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit }: HabitViewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editDate, setEditDate] = useState<string | null>(null);
+  const habitFormRef = useRef<{ save: () => void }>(null);
 
   const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
 
@@ -44,41 +45,69 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
   return (
     <Sheet open={isOpen && !!habit} modal={true}>
       <SheetContent side="bottom" className="h-full w-full p-4 overflow-y-auto" hideCloseButton>
-        <SheetHeader >
+        <SheetHeader>
           <SheetTitle className="flex flex-row items-center w-full justify-between">
-            <div className="flex flex-row items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={onClose} className="p-2">
-                <ArrowLeftIcon className="w-5 h-5" />
-              </Button>
-              <span>{habit.name}</span>
-            </div>
-            {!isEditing && (
-              <div className="flex flex-row gap-2">
-                <Button variant="ghost" onClick={() => setIsEditing(true)} className="p-2">
-                  <EditIcon className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost"
+            {!isEditing ? (
+              // View mode header
+              <>
+                <div className="flex flex-row items-center gap-2">
+                  <Button variant="ghost" size="icon" onClick={onClose} className="p-2">
+                    <ArrowLeftIcon className="w-5 h-5" />
+                  </Button>
+                  <span>{habit.name}</span>
+                </div>
+                <div className="flex flex-row gap-2">
+                  <Button variant="ghost" onClick={() => setIsEditing(true)} className="p-2">
+                    <EditIcon className="w-5 h-5" />
+                  </Button>
+                  <Button variant="ghost"
+                    onClick={() => {
+                      onDeleteHabit(habit.id);
+                      onClose();
+                    }}
+                    className="p-2"
+                  >
+                    <TrashIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-row items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsEditing(false)}
+                    className="p-2"
+                  >
+                    <ArrowLeftIcon className="w-5 h-5" />
+                  </Button>
+                  <span>Edit Habit</span>
+                </div>
+                <Button
+                  variant="ghost"
                   onClick={() => {
-                    onDeleteHabit(habit.id);
-                    onClose();
+                    if (habitFormRef.current) {
+                      habitFormRef.current.save();
+                    }
                   }}
                   className="p-2"
                 >
-                  <TrashIcon className="w-5 h-5" />
+                  <CheckIcon className="w-5 h-5" />
                 </Button>
-              </div>
+              </>
             )}
           </SheetTitle>
         </SheetHeader>
         <div className="space-y-4">
           {isEditing ? (
             <HabitForm
+              ref={habitFormRef}
               initialHabit={habit}
               onSave={(updatedHabit) => {
                 onUpdateHabit(habit.id, updatedHabit);
                 setIsEditing(false);
               }}
-              onCancel={() => setIsEditing(false)}
             />
           ) : (
             <>

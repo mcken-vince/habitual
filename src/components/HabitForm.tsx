@@ -2,7 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Habit } from "@/types";
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { ColorSelect } from "./ColorSelect";
 import { FrequencyDialog } from "./FrequencyDialog";
 
@@ -16,17 +16,23 @@ type PartialHabit = Partial<Habit> & {
 interface HabitFormProps {
   initialHabit?: PartialHabit
   onSave: (habit: PartialHabit) => void;
-  onCancel: () => void;
 }
 
 type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
 
-export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) => {
+export const HabitForm = forwardRef(({
+  initialHabit,
+  onSave,
+}: HabitFormProps, ref) => {
   const [habit, setHabit] = useState<PartialHabit>(
     initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#FF0000" }
   );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
+  // Expose save method to parent via ref
+  useImperativeHandle(ref, () => ({
+    save: handleSave
+  }));
 
   // Helper to summarize frequency
   function getFrequencySummary() {
@@ -227,12 +233,6 @@ export const HabitForm = ({ initialHabit, onSave, onCancel }: HabitFormProps) =>
           </div>
         </>
       )}
-      <div className="mt-4 flex justify-end gap-2">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave}>Save</Button>
-      </div>
     </div>
   );
-};
+});
