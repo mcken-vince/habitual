@@ -14,8 +14,6 @@ npm run dev
 ```
 Visit `localhost:5173` in your browser to view the running app.
 
-
-
 ## Testing
 ### Run unit tests
 ```bash
