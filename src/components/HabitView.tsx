@@ -5,9 +5,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ArrowLeftIcon, EditIcon, TrashIcon, CheckIcon, XIcon } from "lucide-react";
 import { HabitForm } from "@/components/HabitForm";
 import { calculateHabitScore } from "@/lib/scoring";
-import { getDatesInRange } from "@/lib/dates";
 import { UpdateHabitDialog } from "@/components/UpdateHabitDialog";
 import { OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
+import { getDatesInRange } from "@/lib/dates";
 
 interface HabitViewProps {
   habit: Habit;
@@ -22,9 +22,8 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
   const [editDate, setEditDate] = useState<string | null>(null);
   const habitFormRef = useRef<{ save: () => void }>(null);
 
-  const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
-
   const scoreHistory = useMemo(() => {
+    const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
     return allDates.map((date, idx) => {
       // Build a partial history up to and including this date
       const partialHistory: typeof habit.history = {};
@@ -40,7 +39,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
         value: calculateHabitScore(habitForDay),
       };
     });
-  }, [habit, allDates]);
+  }, [habit]);
 
   return (
     <Sheet open={isOpen && !!habit} modal={true}>
@@ -121,7 +120,6 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
               <CalendarWidget
                 habit={habit}
-                dates={allDates}
                 editable={isEditing}
                 onDateClick={
                   isEditing
