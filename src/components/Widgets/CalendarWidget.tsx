@@ -6,11 +6,10 @@ import { toDateStringLocal, parseDateStringLocal, getDatesInRange } from "@/lib/
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, EditIcon, CheckIcon } from "lucide-react";
 
 interface CalendarWidgetProps {
   habit: Habit;
-  editable?: boolean;
   onDateClick?: (date: string, value: number) => void;
 }
 
@@ -49,12 +48,12 @@ function getDatesInYear(year: number): string[] {
 
 export const CalendarWidget = ({
   habit,
-  editable = false,
   onDateClick
 }: CalendarWidgetProps) => {
   const { settings } = useSettings();
   const startDayOfWeek = settings.startDayOfWeek ?? 0;
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [isEditMode, setIsEditMode] = useState(false);
   
   const dates = useMemo(() => getDatesInYear(selectedYear), [selectedYear]);
 
@@ -108,7 +107,9 @@ export const CalendarWidget = ({
     );
   });
 
-  const canGoPrevious = selectedYear > minYear;
+  // Allow users to go back at least 10 years in edit mode
+  // Otherwise, let them go back to the earliest habit data in view mode
+  const canGoPrevious = selectedYear > Math.min(minYear, isEditMode ? currentYear - 10 : minYear);
   const canGoNext = selectedYear < currentYear;
 
   return (
@@ -136,13 +137,21 @@ export const CalendarWidget = ({
             >
               <ChevronRightIcon className="w-4 h-4" />
             </Button>
-                        <Button
+            <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedYear(currentYear)}
               title="Jump to Current Year"
             >
               <CalendarIcon className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={isEditMode ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setIsEditMode(!isEditMode)}
+              title={isEditMode ? "Exit edit mode" : "Enter edit mode"}
+            >
+              {isEditMode ? <CheckIcon className="w-4 h-4" /> : <EditIcon className="w-4 h-4" />}
             </Button>
           </div>
         </CardTitle>
@@ -178,14 +187,14 @@ export const CalendarWidget = ({
                     return (
                       <div
                         key={date}
-                        className={`w-8 h-8 pt-1 rounded flex align-center justify-center select-none ${editable ? "cursor-pointer hover:opacity-80" : ""}`}
+                        className={`w-8 h-8 pt-1 rounded flex align-center justify-center select-none ${isEditMode ? "cursor-pointer hover:opacity-80" : ""}`}
                         style={{
                           backgroundColor: bgColor,
                           color: textColor
                         }}
                         title={`${date}: ${value} ${habit.unit || ""}`}
                         onClick={
-                          editable
+                          isEditMode
                             ? () => onDateClick?.(date, value)
                             : undefined
                         }

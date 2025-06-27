@@ -120,18 +120,19 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onDeleteHabit
 
               <CalendarWidget
                 habit={habit}
-                editable={isEditing}
-                onDateClick={
-                  isEditing
-                    ? (date) => {
-                      if (habit.type === "boolean") {
-                        onUpdateHabit(habit.id, { ...habit, history: { ...habit.history, [date]: habit.history[date] ? 0 : 1 } });
-                      } else {
-                        setEditDate(date)
-                      }
-                    }
-                    : undefined
-                }
+                onDateClick={(date) => {
+                  if (habit.type === "boolean") {
+                    onUpdateHabit(habit.id, { 
+                      ...habit, 
+                      history: { 
+                        ...habit.history, 
+                        [date]: habit.history[date] ? 0 : 1 
+                      } 
+                    });
+                  } else {
+                    setEditDate(date)
+                  }
+                }}
               />
             </>
           )}
