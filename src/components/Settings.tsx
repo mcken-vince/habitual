@@ -3,6 +3,8 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { useSettings } from "@/hooks/useSettings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Label } from "./ui/label";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 export const Settings = ({ open, onClose }: { open: boolean, onClose: (value: boolean) => void }) => {
   const { settings, updateSettings } = useSettings();
@@ -17,6 +19,25 @@ export const Settings = ({ open, onClose }: { open: boolean, onClose: (value: bo
           <SheetTitle>Settings</SheetTitle>
         </SheetHeader>
         <div className="mt-4 space-y-4">
+          {/* Theme setting */}
+          <div>
+            <Label className="text-sm font-medium">Theme</Label>
+            <RadioGroup
+              value={settings.theme || "light"}
+              onValueChange={(value) => updateSettings({ theme: value as "light" | "dark" })}
+              className="mt-2"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="light" id="light" />
+                <Label htmlFor="light">Light</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="dark" id="dark" />
+                <Label htmlFor="dark">Dark</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           {/* Start day of week setting */}
           <div>
             <label className="block text-sm font-medium mb-1">Start day of week</label>
