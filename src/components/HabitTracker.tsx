@@ -116,7 +116,7 @@ function HabitTracker() {
       onTouchMove={handleTouchMove}
       onTouchEnd={endDrag}>
       {/* Header */}
-      <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm">
+      <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm dark:bg-slate-900 dark:text-slate-200">
         <h1 className="text-2xl font-bold">Habitual</h1>
         <div className="flex flex-row gap-2">
           <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
