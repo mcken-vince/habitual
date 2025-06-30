@@ -49,6 +49,16 @@ export const SettingsProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [settings]);
 
+  // Apply theme to document element
+  useEffect(() => {
+    const root = document.documentElement;
+    if (settings.theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+  }, [settings.theme]);
+
   const updateSettings = (updated: Partial<Settings>) => {
     setSettings((prev) => ({ ...prev, ...updated }));
   };
