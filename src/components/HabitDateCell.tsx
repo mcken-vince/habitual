@@ -31,7 +31,7 @@ export const HabitDateCell = ({ habit, date, onPress, onLongPress }: HabitDateCe
   }
 
   useEffect(() => {
-    if (isPressing) {
+    if (isPressing && !longPressTriggered) {
       timerRef.current = setTimeout(() => {
         setLongPressTriggered(true);
         onLongPress();
