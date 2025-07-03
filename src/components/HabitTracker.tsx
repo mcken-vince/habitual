@@ -6,7 +6,7 @@ import { HabitListItem } from "@/components/HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
 import { HabitView } from "@/components/HabitView";
 import { HabitForm } from "@/components/HabitForm";
-import { PlusIcon, Settings2Icon, CheckIcon, ArrowLeftIcon } from "lucide-react";
+import { PlusIcon, Settings2Icon, CheckIcon, ArrowLeftIcon, EditIcon, TrashIcon, XIcon } from "lucide-react";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 import { Settings } from "@/components/Settings";
 
@@ -15,6 +15,8 @@ function HabitTracker() {
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOpen, setHabitFormOpen] = useState<boolean>(false);
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
+  const [selectedListHabit, setSelectedListHabit] = useState<Habit | null>(null);
+  const [editFormOpen, setEditFormOpen] = useState<boolean>(false);
   const [visibleDatesCount, setVisibleDatesCount] = useState<number>(5);
   const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -37,8 +39,30 @@ function HabitTracker() {
     return () => window.removeEventListener("resize", calculateDateCount);
   }, []);
 
-  const openHabitView = (habit: Habit) => {
+const openHabitView = (habit: Habit) => {
+    setSelectedListHabit(null); // Clear any previous selection
     setSelectedHabit(habit);
+  }
+
+  const handleSelectHabit = (habit: Habit) => {
+    setSelectedListHabit(habit);
+  }
+
+  const handleDeselectHabit = () => {
+    setSelectedListHabit(null);
+  }
+
+  const handleEditHabit = () => {
+    if (selectedListHabit) {
+      setEditFormOpen(true);
+    }
+  }
+
+  const handleDeleteHabit = () => {
+    if (selectedListHabit) {
+      deleteHabit(selectedListHabit.id);
+      setSelectedListHabit(null); // Clear selection after deletion
+    }
   }
 
   if (selectedHabit) {
@@ -119,57 +143,118 @@ function HabitTracker() {
       <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm dark:bg-slate-900 dark:text-slate-200">
         <h1 className="text-2xl font-bold">Habitual</h1>
         <div className="flex flex-row gap-2">
-          <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
-            <SheetTrigger asChild>
-              <Button><PlusIcon /></Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
-              <SheetHeader>
-                <SheetTitle className="flex flex-row items-center w-full justify-between">
-                  <div className="flex flex-row items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setHabitFormOpen(false)}
-                      className="p-2"
-                    >
-                      <ArrowLeftIcon className="w-5 h-5" />
-                    </Button>
-                    <span>New Habit</span>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      if (habitFormRef.current) {
-                        habitFormRef.current.save();
-                      }
+          {selectedListHabit ? (
+            <>
+              <Button variant="ghost" onClick={handleEditHabit}>
+                <EditIcon />
+              </Button>
+              <Button variant="ghost" onClick={handleDeleteHabit}>
+                <TrashIcon />
+              </Button>
+              <Button variant="ghost" onClick={handleDeselectHabit}>
+                <XIcon />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
+                <SheetTrigger asChild>
+                  <Button><PlusIcon /></Button>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
+                  <SheetHeader>
+                    <SheetTitle className="flex flex-row items-center w-full justify-between">
+                      <div className="flex flex-row items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setHabitFormOpen(false)}
+                          className="p-2"
+                        >
+                          <ArrowLeftIcon className="w-5 h-5" />
+                        </Button>
+                        <span>New Habit</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          if (habitFormRef.current) {
+                            habitFormRef.current.save();
+                          }
+                        }}
+                        className="p-2"
+                      >
+                        <CheckIcon className="w-5 h-5" />
+                      </Button>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <HabitForm
+                    ref={habitFormRef}
+                    onSave={(habit) => {
+                      addHabit({
+                        id: Date.now().toString(),
+                        ...habit,
+                        history: {},
+                        createdAt: new Date().toISOString(),
+                      });
+                      setHabitFormOpen(false);
                     }}
-                    className="p-2"
-                  >
-                    <CheckIcon className="w-5 h-5" />
-                  </Button>
-                </SheetTitle>
-              </SheetHeader>
-              <HabitForm
-                ref={habitFormRef}
-                onSave={(habit) => {
-                  addHabit({
-                    id: Date.now().toString(),
-                    ...habit,
-                    history: {},
-                    createdAt: new Date().toISOString(),
-                  });
-                  setHabitFormOpen(false);
-                }}
-              />
-            </SheetContent>
-          </Sheet>
-          <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
-            <Settings2Icon />
-          </Button>
+                  />
+                </SheetContent>
+              </Sheet>
+              <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
+                <Settings2Icon />
+              </Button>
+            </>
+          )}
         </div>
       </header>
+      
+      {/* Edit Habit Sheet */}
+      <Sheet open={editFormOpen} onOpenChange={() => setEditFormOpen((prev) => !prev)}>
+        <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
+          <SheetHeader>
+            <SheetTitle className="flex flex-row items-center w-full justify-between">
+              <div className="flex flex-row items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditFormOpen(false)}
+                  className="p-2"
+                >
+                  <ArrowLeftIcon className="w-5 h-5" />
+                </Button>
+                <span>Edit Habit</span>
+              </div>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (habitFormRef.current) {
+                    habitFormRef.current.save();
+                  }
+                }}
+                className="p-2"
+              >
+                <CheckIcon className="w-5 h-5" />
+              </Button>
+            </SheetTitle>
+          </SheetHeader>
+          {selectedListHabit && (
+            <HabitForm
+              ref={habitFormRef}
+              initialHabit={selectedListHabit}
+              onSave={(habit) => {
+                updateHabit(selectedListHabit.id, habit);
+                setEditFormOpen(false);
+                setSelectedListHabit(null);
+              }}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+
       <Settings open={settingsOpen} onClose={(value) => setSettingsOpen(value)} />
+      
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
@@ -206,6 +291,8 @@ function HabitTracker() {
             visibleDates={visibleDates}
             updateCompletion={updateCompletion}
             onClick={() => openHabitView(habit)}
+            onLongPress={() => handleSelectHabit(habit)}
+            isSelected={selectedListHabit?.id === habit.id}
           />
         ))}
       </div>
