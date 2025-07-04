@@ -1,27 +1,24 @@
 import { useEffect, useRef, useState } from "react";
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { HabitListItem } from "@/components/HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
 import { HabitView } from "@/components/HabitView";
-import { HabitForm } from "@/components/HabitForm";
-import { PlusIcon, Settings2Icon, CheckIcon, ArrowLeftIcon, EditIcon, TrashIcon, XIcon } from "lucide-react";
+import { PlusIcon, Settings2Icon, EditIcon, TrashIcon, XIcon } from "lucide-react";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 import { Settings } from "@/components/Settings";
+import { HabitFormSheet } from "./HabitFormSheet";
 
 function HabitTracker() {
-  const { habits, addHabit, updateHabit, deleteHabit, updateCompletion } = useHabits();
+  const { habits, updateHabit, deleteHabit, updateCompletion } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
-  const [habitFormOpen, setHabitFormOpen] = useState<boolean>(false);
+  const [habitFormOptions, setHabitFormOptions] = useState<{ open: boolean; initialHabit: Habit | undefined; }>({ open: false, initialHabit: undefined });
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [selectedListHabit, setSelectedListHabit] = useState<Habit | null>(null);
-  const [editFormOpen, setEditFormOpen] = useState<boolean>(false);
   const [visibleDatesCount, setVisibleDatesCount] = useState<number>(5);
   const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartX = useRef<number | null>(null);
-  const habitFormRef = useRef<{ save: () => void }>(null);
 
   // Dynamically adjust visibleDateCount based on screen width
   useEffect(() => {
@@ -39,7 +36,7 @@ function HabitTracker() {
     return () => window.removeEventListener("resize", calculateDateCount);
   }, []);
 
-const openHabitView = (habit: Habit) => {
+  const openHabitView = (habit: Habit) => {
     setSelectedListHabit(null); // Clear any previous selection
     setSelectedHabit(habit);
   }
@@ -52,9 +49,13 @@ const openHabitView = (habit: Habit) => {
     setSelectedListHabit(null);
   }
 
+  const handleCreateHabit = () => {
+    setHabitFormOptions({ open: true, initialHabit: undefined });
+  }
+
   const handleEditHabit = () => {
     if (selectedListHabit) {
-      setEditFormOpen(true);
+      setHabitFormOptions({ open: true, initialHabit: selectedListHabit });
     }
   }
 
@@ -63,6 +64,27 @@ const openHabitView = (habit: Habit) => {
       deleteHabit(selectedListHabit.id);
       setSelectedListHabit(null); // Clear selection after deletion
     }
+  }
+
+  const resetHabitForm = () => {
+    setHabitFormOptions({ open: false, initialHabit: undefined });
+    setSelectedListHabit(null);
+  }
+
+  if (habitFormOptions.open) {
+    return (
+      <HabitFormSheet 
+        open={habitFormOptions.open}
+        onSave={(habit) => {
+          if (selectedHabit) {
+            // Update selected habit if form was opened from HabitView
+            setSelectedHabit(prev => ({...prev, ...habit}));
+          }
+        }}
+        onClose={resetHabitForm}
+        initialHabit={habitFormOptions.initialHabit}
+      />
+    )
   }
 
   if (selectedHabit) {
@@ -74,6 +96,10 @@ const openHabitView = (habit: Habit) => {
         onUpdateHabit={(id, updatedHabit) => {
           updateHabit(id, updatedHabit);
           setSelectedHabit((prev) => (prev ? { ...prev, ...updatedHabit } : null));
+        }}
+        onEditHabit={(habit: Habit) => {
+          setHabitFormOptions({ open: true, initialHabit: habit });
+          setSelectedListHabit(null);
         }}
         onDeleteHabit={(id) => {
           deleteHabit(id);
@@ -157,51 +183,7 @@ const openHabitView = (habit: Habit) => {
             </>
           ) : (
             <>
-              <Sheet open={habitFormOpen} onOpenChange={() => setHabitFormOpen((prev) => !prev)}>
-                <SheetTrigger asChild>
-                  <Button><PlusIcon /></Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
-                  <SheetHeader>
-                    <SheetTitle className="flex flex-row items-center w-full justify-between">
-                      <div className="flex flex-row items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setHabitFormOpen(false)}
-                          className="p-2"
-                        >
-                          <ArrowLeftIcon className="w-5 h-5" />
-                        </Button>
-                        <span>New Habit</span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          if (habitFormRef.current) {
-                            habitFormRef.current.save();
-                          }
-                        }}
-                        className="p-2"
-                      >
-                        <CheckIcon className="w-5 h-5" />
-                      </Button>
-                    </SheetTitle>
-                  </SheetHeader>
-                  <HabitForm
-                    ref={habitFormRef}
-                    onSave={(habit) => {
-                      addHabit({
-                        id: Date.now().toString(),
-                        ...habit,
-                        history: {},
-                        createdAt: new Date().toISOString(),
-                      });
-                      setHabitFormOpen(false);
-                    }}
-                  />
-                </SheetContent>
-              </Sheet>
+              <Button onClick={handleCreateHabit}><PlusIcon /></Button>
               <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
                 <Settings2Icon />
               </Button>
@@ -209,52 +191,9 @@ const openHabitView = (habit: Habit) => {
           )}
         </div>
       </header>
-      
-      {/* Edit Habit Sheet */}
-      <Sheet open={editFormOpen} onOpenChange={() => setEditFormOpen((prev) => !prev)}>
-        <SheetContent side="bottom" className="h-full p-4" hideCloseButton>
-          <SheetHeader>
-            <SheetTitle className="flex flex-row items-center w-full justify-between">
-              <div className="flex flex-row items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setEditFormOpen(false)}
-                  className="p-2"
-                >
-                  <ArrowLeftIcon className="w-5 h-5" />
-                </Button>
-                <span>Edit Habit</span>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (habitFormRef.current) {
-                    habitFormRef.current.save();
-                  }
-                }}
-                className="p-2"
-              >
-                <CheckIcon className="w-5 h-5" />
-              </Button>
-            </SheetTitle>
-          </SheetHeader>
-          {selectedListHabit && (
-            <HabitForm
-              ref={habitFormRef}
-              initialHabit={selectedListHabit}
-              onSave={(habit) => {
-                updateHabit(selectedListHabit.id, habit);
-                setEditFormOpen(false);
-                setSelectedListHabit(null);
-              }}
-            />
-          )}
-        </SheetContent>
-      </Sheet>
 
       <Settings open={settingsOpen} onClose={(value) => setSettingsOpen(value)} />
-      
+
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
