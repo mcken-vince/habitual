@@ -4,6 +4,7 @@ import { HabitDateCell } from "./HabitDateCell";
 import { calculateHabitScore } from "@/lib/scoring";
 import { SimplePie } from "./SimplePie";
 import { UpdateHabitDialog } from "./UpdateHabitDialog";
+import { GripVerticalIcon } from "lucide-react";
 
 interface HabitListItemProps {
   habit: Habit;
@@ -11,6 +12,7 @@ interface HabitListItemProps {
   onClick: () => void;
   onLongPress: () => void;
   isSelected: boolean;
+  isDraggable?: boolean;
   visibleDates: string[];
 }
 
@@ -20,6 +22,7 @@ export function HabitListItem({
   onClick,
   onLongPress,
   isSelected,
+  isDraggable = false,
   visibleDates,
 }: HabitListItemProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -42,7 +45,7 @@ export function HabitListItem({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    
+
     if (!isLongPressing) {
       onClick();
     }
@@ -71,7 +74,7 @@ export function HabitListItem({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-    
+
     if (!isLongPressing) {
       onClick();
     }
@@ -81,15 +84,20 @@ export function HabitListItem({
   return (
     <div className={`${isSelected ? 'border-3 border-slate-800 dark:border-slate-100' : ''}`}>
       <div className={`flex flex-row items-center gap-2 py-1 border-b`}>
-        <div 
+        <div
           className="min-w-30 flex flex-row flex-grow-1 cursor-pointer select-none"
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-        >
-          <SimplePie percentage={score} color={habit.color}/>
+          >
+          {isDraggable && (
+            <div className="cursor-grab active:cursor-grabbing p-1 my-auto text-gray-400 hover:text-gray-600">
+              <GripVerticalIcon size={16} />
+            </div>
+          )}
+          <SimplePie percentage={score} color={habit.color} />
           <h3 className="text-sm font-semibold my-auto leading-3.5">{habit.name}</h3>
         </div>
         <div className="grid"

@@ -10,15 +10,18 @@ import { Settings } from "@/components/Settings";
 import { HabitFormSheet } from "./HabitFormSheet";
 
 function HabitTracker() {
-  const { habits, updateHabit, deleteHabit, updateCompletion } = useHabits();
+  const { habits, updateHabit, deleteHabit, updateCompletion, reorderHabits } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOptions, setHabitFormOptions] = useState<{ open: boolean; initialHabit: Habit | undefined; }>({ open: false, initialHabit: undefined });
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
   const [selectedListHabit, setSelectedListHabit] = useState<Habit | null>(null);
   const [visibleDatesCount, setVisibleDatesCount] = useState<number>(5);
   const [visibleDates, setVisibleDates] = useState<string[]>(getDatesInRange(new Date(), visibleDatesCount));
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const dragStartX = useRef<number | null>(null);
+  const [isScrollDragging, setIsScrollDragging] = useState<boolean>(false);
+  const dragScrollStartX = useRef<number | null>(null);
+  const [draggedHabitIndex, setDraggedHabitIndex] = useState<number | null>(null);
+  const [dragOverHabitIndex, setDragOverHabitIndex] = useState<number | null>(null);
+  const [isDraggingHabit, setIsDraggingHabit] = useState<boolean>(false);
 
   // Dynamically adjust visibleDateCount based on screen width
   useEffect(() => {
@@ -73,12 +76,12 @@ function HabitTracker() {
 
   if (habitFormOptions.open) {
     return (
-      <HabitFormSheet 
+      <HabitFormSheet
         open={habitFormOptions.open}
         onSave={(habit) => {
           if (selectedHabit) {
             // Update selected habit if form was opened from HabitView
-            setSelectedHabit(prev => ({...prev, ...habit}));
+            setSelectedHabit(prev => ({ ...prev, ...habit }));
           }
         }}
         onClose={resetHabitForm}
@@ -109,10 +112,11 @@ function HabitTracker() {
     )
   }
 
-  const handleDragMove = (clientX: number) => {
-    if (!isDragging || dragStartX.current === null) return;
+  // Handlers for horizontal scrolling across dates
+  const handleHorizontalDragScroll = (clientX: number) => {
+    if (!isScrollDragging || dragScrollStartX.current === null) return;
 
-    const dragDistance = clientX - dragStartX.current;
+    const dragDistance = clientX - dragScrollStartX.current;
     if (Math.abs(dragDistance) >= 40) {
       const direction = dragDistance < 0 ? -1 : 1;
       const baseDate = parseDateStringLocal(visibleDates[0]);
@@ -125,46 +129,115 @@ function HabitTracker() {
       maxStartDate.setDate(today.getDate() - (visibleDatesCount - 1));
 
       if (direction === 1 && newStartDate > today) {
-        setIsDragging(false);
-        dragStartX.current = null;
+        setIsScrollDragging(false);
+        dragScrollStartX.current = null;
         return;
       }
 
       setVisibleDates(getDatesInRange(newStartDate, visibleDatesCount));
-      dragStartX.current = clientX; // Reset drag start position
+      dragScrollStartX.current = clientX; // Reset drag start position
     }
   };
 
-  const handleTouchMove = (event: React.TouchEvent) => {
-    handleDragMove(event.touches[0].clientX);
+  const handleTouchScroll = (event: React.TouchEvent) => {
+    handleHorizontalDragScroll(event.touches[0].clientX);
   };
 
-  const handleMouseMove = (event: React.MouseEvent) => {
-    handleDragMove(event.clientX);
+  const handleMouseScroll = (event: React.MouseEvent) => {
+    handleHorizontalDragScroll(event.clientX);
   };
 
-  const startDrag = (clientX: number) => {
-    setIsDragging(true);
-    dragStartX.current = clientX;
+  const startDragScroll = (clientX: number) => {
+    setIsScrollDragging(true);
+    dragScrollStartX.current = clientX;
   };
 
-  const handleTouchStart = (event: React.TouchEvent) => {
-    startDrag(event.touches[0].clientX);
+  const handleTouchStartForScroll = (event: React.TouchEvent) => {
+    startDragScroll(event.touches[0].clientX);
   };
 
-  const handleMouseDown = (event: React.MouseEvent) => {
-    startDrag(event.clientX);
+  const handleMouseDownForScroll = (event: React.MouseEvent) => {
+    startDragScroll(event.clientX);
   };
 
-  const endDrag = () => {
-    setIsDragging(false);
-    dragStartX.current = null;
+  const endDragForScroll = () => {
+    setIsScrollDragging(false);
+    dragScrollStartX.current = null;
   }
 
+  // Drag and drop handlers for habit reordering
+  const handleDragStartForReorder = (e: React.DragEvent, index: number) => {
+    setDraggedHabitIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOverForReorder = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverHabitIndex(index);
+  };
+
+  const handleDragEndForReorder = () => {
+    setDraggedHabitIndex(null);
+    setDragOverHabitIndex(null);
+  };
+
+  const handleDropForReorder = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (draggedHabitIndex !== null && draggedHabitIndex !== dropIndex) {
+      reorderHabits(draggedHabitIndex, dropIndex);
+    }
+    setDraggedHabitIndex(null);
+    setDragOverHabitIndex(null);
+  };
+
+  // Touch-based drag and drop handlers for mobile
+  const handleTouchStartForReorder = (e: React.TouchEvent, index: number) => {
+    // Only start drag if habit is selected
+    if (selectedListHabit?.id !== habits[index].id) return;
+
+    setDraggedHabitIndex(index);
+    setIsDraggingHabit(true);
+
+    // Stop event propagation to prevent conflicts with other touch handlers
+    e.stopPropagation();
+  };
+
+  const handleTouchMoveForReorder = (e: React.TouchEvent) => {
+    if (!isDraggingHabit || draggedHabitIndex === null) return;
+
+    const touch = e.touches[0];
+
+    // Calculate which habit we're hovering over
+    const habitElements = document.querySelectorAll('[data-habit-index]');
+    let newDragOverIndex = draggedHabitIndex;
+
+    for (let i = 0; i < habitElements.length; i++) {
+      const element = habitElements[i] as HTMLElement;
+      const rect = element.getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        newDragOverIndex = parseInt(element.getAttribute('data-habit-index') || '0');
+        break;
+      }
+    }
+
+    setDragOverHabitIndex(newDragOverIndex);
+  };
+
+  const handleTouchEndForReorder = () => {
+    if (isDraggingHabit && draggedHabitIndex !== null && dragOverHabitIndex !== null && draggedHabitIndex !== dragOverHabitIndex) {
+      reorderHabits(draggedHabitIndex, dragOverHabitIndex);
+    }
+
+    setDraggedHabitIndex(null);
+    setDragOverHabitIndex(null);
+    setIsDraggingHabit(false);
+  };
+
   return (
-    <div className="w-full" onMouseMove={handleMouseMove} onMouseUp={endDrag}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={endDrag}>
+    <div className="w-full" onMouseMove={handleMouseScroll} onMouseUp={endDragForScroll}
+      onTouchMove={isDraggingHabit ? handleTouchMoveForReorder : handleTouchScroll}
+      onTouchEnd={isDraggingHabit ? handleTouchEndForReorder : endDragForScroll}>
       {/* Header */}
       <header className="flex w-full items-center justify-between mb-6 bg-gray-100 p-4 rounded-md shadow-sm dark:bg-slate-900 dark:text-slate-200">
         <h1 className="text-2xl font-bold">Habitual</h1>
@@ -199,8 +272,8 @@ function HabitTracker() {
         <div className="flex flex-grow-1 min-w-30 p-2"></div>
         <div className="grid items-center"
           style={{ gridTemplateColumns: `repeat(${visibleDatesCount}, var(--date-cell-width))` }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}>
+          onMouseDown={handleMouseDownForScroll}
+          onTouchStart={handleTouchStartForScroll}>
           {visibleDates.map((date) => (
             <div key={date} className="flex align-center justify-center w-full">
               <div className="text-center text-sm font-medium">
@@ -223,17 +296,44 @@ function HabitTracker() {
       </div>
       {/* Habit List */}
       <div>
-        {habits.map((habit) => (
-          <HabitListItem
-            key={habit.id}
-            habit={habit}
-            visibleDates={visibleDates}
-            updateCompletion={updateCompletion}
-            onClick={() => openHabitView(habit)}
-            onLongPress={() => handleSelectHabit(habit)}
-            isSelected={selectedListHabit?.id === habit.id}
-          />
-        ))}
+        {habits.map((habit, index) => {
+          const isSelected = selectedListHabit?.id === habit.id;
+          let wrapperClasses = 'border-slate-500 dark:border-slate-400'
+          if (dragOverHabitIndex === index && draggedHabitIndex !== index) {
+            if ((draggedHabitIndex ?? 0) >= index || index === 0) {
+              wrapperClasses += ' border-t-2';
+            } else {
+              wrapperClasses += ' border-b-2';
+            }
+          }
+          if (draggedHabitIndex === index) {
+            wrapperClasses += ' opacity-50';
+          }
+          return (
+            <div
+              key={habit.id}
+              data-habit-index={index}
+              draggable={isSelected}
+              onDragStart={(e) => handleDragStartForReorder(e, index)}
+              onDragOver={(e) => handleDragOverForReorder(e, index)}
+              onDragEnd={handleDragEndForReorder}
+              onDrop={(e) => handleDropForReorder(e, index)}
+              onTouchStart={(e) => handleTouchStartForReorder(e, index)}
+              className={wrapperClasses}
+              style={{ touchAction: isSelected ? 'none' : 'auto' }} // Prevent touch scrolling when reordering
+            >
+              <HabitListItem
+                habit={habit}
+                visibleDates={visibleDates}
+                updateCompletion={updateCompletion}
+                onClick={() => openHabitView(habit)}
+                onLongPress={() => handleSelectHabit(habit)}
+                isSelected={isSelected}
+                isDraggable={isSelected}
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   );
