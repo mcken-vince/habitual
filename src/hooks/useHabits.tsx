@@ -7,6 +7,7 @@ export interface HabitsContextType {
   updateHabit: (id: string, updatedHabit: Partial<Habit>) => void;
   deleteHabit: (id: string) => void;
   updateCompletion: (habitId: string, date: string, value: number) => void;
+  reorderHabits: (startIndex: number, endIndex: number) => void;
 }
 
 export const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
@@ -26,7 +27,12 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     const savedHabits = localStorage.getItem("habits");
     if (savedHabits) {
       try {
-        return JSON.parse(savedHabits) as Habit[];
+        const parsedHabits = JSON.parse(savedHabits) as Habit[];
+        // Ensure all habits have an order field, assign based on array index if missing
+        return parsedHabits.map((habit, index) => ({
+          ...habit,
+          order: habit.order !== undefined ? habit.order : index
+        })).sort((a, b) => a.order - b.order);
       } catch (error) {
         console.error("Failed to parse habits from localStorage:", error);
         return [];
@@ -45,7 +51,10 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   }, [habits, updateTrigger]);
 
   const addHabit = (habit: Habit) => {
-    setHabits((prevHabits) => [...prevHabits, habit]);
+    // Assign the next order value
+    const maxOrder = habits.length > 0 ? Math.max(...habits.map(h => h.order)) : -1;
+    const habitWithOrder = { ...habit, order: maxOrder + 1 };
+    setHabits((prevHabits) => [...prevHabits, habitWithOrder]);
     setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
@@ -68,21 +77,36 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
       prevHabits.map((habit) =>
         habit.id === habitId
           ? {
-              ...habit,
-              history: {
-                ...habit.history,
-                [date]: value,
-              },
-            }
+            ...habit,
+            history: {
+              ...habit.history,
+              [date]: value,
+            },
+          }
           : habit
       )
     );
     setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
+  const reorderHabits = (startIndex: number, endIndex: number) => {
+    setHabits((prevHabits) => {
+      const sortedHabits = [...prevHabits].sort((a, b) => a.order - b.order);
+      const [reorderedItem] = sortedHabits.splice(startIndex, 1);
+      sortedHabits.splice(endIndex, 0, reorderedItem);
+
+      // Update order values
+      return sortedHabits.map((habit, index) => ({
+        ...habit,
+        order: index
+      }));
+    });
+    setUpdateTrigger((prev) => prev + 1);
+  };
+
   return (
     <HabitsContext.Provider
-      value={{ habits, addHabit, updateHabit, deleteHabit, updateCompletion }}
+      value={{ habits, addHabit, updateHabit, deleteHabit, updateCompletion, reorderHabits }}
     >
       {children}
     </HabitsContext.Provider>

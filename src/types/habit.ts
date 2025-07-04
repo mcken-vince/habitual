@@ -9,4 +9,5 @@ export interface Habit {
   frequencyDays?: number; // Number of days for frequency target
   color: string; // Color for the habit
   createdAt: string; // ISO date string
+  order: number; // Order position for sorting
 }
