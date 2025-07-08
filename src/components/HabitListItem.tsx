@@ -81,8 +81,10 @@ export function HabitListItem({
     setIsLongPressing(false);
   };
 
+  const habitColor = habit.isArchived ? 'gray' : habit.color
+
   return (
-    <div className={`${isSelected ? 'border-3 border-slate-800 dark:border-slate-100' : ''}`}>
+    <div className={`${isSelected ? 'border-3 border-slate-800 dark:border-slate-100' : ''} ${habit.isArchived ? 'bg-slate-50 dark:bg-slate-900' : ''}`}>
       <div className={`flex flex-row items-center gap-2 py-1 border-b`}>
         <div
           className="min-w-30 flex flex-row flex-grow-1 cursor-pointer select-none"
@@ -91,13 +93,13 @@ export function HabitListItem({
           onMouseLeave={handleMouseLeave}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          >
+        >
           {isDraggable && (
             <div className="cursor-grab active:cursor-grabbing p-1 my-auto text-gray-400 hover:text-gray-600">
               <GripVerticalIcon size={16} />
             </div>
           )}
-          <SimplePie percentage={score} color={habit.color} />
+          <SimplePie percentage={score} color={habitColor} />
           <h3 className="text-sm font-semibold my-auto leading-3.5">{habit.name}</h3>
         </div>
         <div className="grid"
@@ -105,7 +107,7 @@ export function HabitListItem({
           {visibleDates.map((date) => (
             <HabitDateCell
               key={date}
-              habit={habit}
+              habit={{ ...habit, color: habitColor }}
               date={date}
               onPress={() => {
                 setSelectedDate(date);

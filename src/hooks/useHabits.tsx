@@ -8,6 +8,7 @@ export interface HabitsContextType {
   deleteHabit: (id: string) => void;
   updateCompletion: (habitId: string, date: string, value: number) => void;
   reorderHabits: (startIndex: number, endIndex: number) => void;
+  toggleHabitIsArchived: (id: string, isArchived: boolean) => void;
 }
 
 export const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
@@ -31,7 +32,8 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
         // Ensure all habits have an order field, assign based on array index if missing
         return parsedHabits.map((habit, index) => ({
           ...habit,
-          order: habit.order !== undefined ? habit.order : index
+          order: habit.order !== undefined ? habit.order : index,
+          isArchived: habit.isArchived || false // Ensure archived field exists
         })).sort((a, b) => a.order - b.order);
       } catch (error) {
         console.error("Failed to parse habits from localStorage:", error);
@@ -89,14 +91,23 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     setUpdateTrigger((prev) => prev + 1); // Trigger update
   };
 
+  const toggleHabitIsArchived = (id: string, isArchived: boolean) => {
+    setHabits((prevHabits) =>
+      prevHabits.map((habit) =>
+        habit.id === id ? { ...habit, isArchived } : habit
+      )
+    );
+    setUpdateTrigger((prev) => prev + 1);
+  };
+
   const reorderHabits = (startIndex: number, endIndex: number) => {
     setHabits((prevHabits) => {
-      const sortedHabits = [...prevHabits].sort((a, b) => a.order - b.order);
-      const [reorderedItem] = sortedHabits.splice(startIndex, 1);
-      sortedHabits.splice(endIndex, 0, reorderedItem);
+      const allHabits = [...prevHabits];     
+      const [reorderedItem] = allHabits.splice(startIndex, 1);
+      allHabits.splice(endIndex, 0, reorderedItem);
 
-      // Update order values
-      return sortedHabits.map((habit, index) => ({
+      // Reassign order values based on new positions
+      return allHabits.map((habit, index) => ({
         ...habit,
         order: index
       }));
@@ -106,7 +117,15 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <HabitsContext.Provider
-      value={{ habits, addHabit, updateHabit, deleteHabit, updateCompletion, reorderHabits }}
+      value={{
+        habits,
+        addHabit,
+        updateHabit,
+        deleteHabit,
+        updateCompletion,
+        reorderHabits,
+        toggleHabitIsArchived,
+      }}
     >
       {children}
     </HabitsContext.Provider>

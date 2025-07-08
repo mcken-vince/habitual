@@ -10,4 +10,5 @@ export interface Habit {
   color: string; // Color for the habit
   createdAt: string; // ISO date string
   order: number; // Order position for sorting
+  isArchived: boolean; // New field for archiving
 }

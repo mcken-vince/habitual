@@ -1,16 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { HabitListItem } from "@/components/HabitListItem";
 import { useHabits } from "@/hooks/useHabits";
 import { HabitView } from "@/components/HabitView";
-import { PlusIcon, Settings2Icon, EditIcon, TrashIcon, XIcon } from "lucide-react";
+import { PlusIcon, Settings2Icon, EditIcon, TrashIcon, XIcon, ArchiveIcon, ArchiveRestoreIcon } from "lucide-react";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 import { Settings } from "@/components/Settings";
 import { HabitFormSheet } from "./HabitFormSheet";
 
 function HabitTracker() {
-  const { habits, updateHabit, deleteHabit, updateCompletion, reorderHabits } = useHabits();
+  const {
+    habits,
+    updateHabit,
+    deleteHabit,
+    updateCompletion,
+    reorderHabits,
+    toggleHabitIsArchived,
+  } = useHabits();
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
   const [habitFormOptions, setHabitFormOptions] = useState<{ open: boolean; initialHabit: Habit | undefined; }>({ open: false, initialHabit: undefined });
   const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
@@ -22,6 +29,7 @@ function HabitTracker() {
   const [draggedHabitIndex, setDraggedHabitIndex] = useState<number | null>(null);
   const [dragOverHabitIndex, setDragOverHabitIndex] = useState<number | null>(null);
   const [isDraggingHabit, setIsDraggingHabit] = useState<boolean>(false);
+  const [showArchivedHabits, setShowArchivedHabits] = useState<boolean>(false);
 
   // Dynamically adjust visibleDateCount based on screen width
   useEffect(() => {
@@ -73,6 +81,17 @@ function HabitTracker() {
     setHabitFormOptions({ open: false, initialHabit: undefined });
     setSelectedListHabit(null);
   }
+
+  const handleArchiveHabit = () => {
+    if (selectedListHabit) {
+      toggleHabitIsArchived(selectedListHabit.id, !selectedListHabit.isArchived);
+      setSelectedListHabit(null); // Clear selection after archiving
+    }
+  }
+
+  const visibleHabits = useMemo(() => {
+    return habits.filter((habit) => showArchivedHabits ? true : !habit.isArchived);
+  }, [habits, showArchivedHabits]);
 
   if (habitFormOptions.open) {
     return (
@@ -166,15 +185,17 @@ function HabitTracker() {
   }
 
   // Drag and drop handlers for habit reordering
-  const handleDragStartForReorder = (e: React.DragEvent, index: number) => {
-    setDraggedHabitIndex(index);
+  const handleDragStartForReorder = (e: React.DragEvent, habitId: string) => {
+    const actualIndex = habits.findIndex(h => h.id === habitId);
+    setDraggedHabitIndex(actualIndex);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOverForReorder = (e: React.DragEvent, index: number) => {
+  const handleDragOverForReorder = (e: React.DragEvent, habitId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDragOverHabitIndex(index);
+    const actualIndex = habits.findIndex(h => h.id === habitId);
+    setDragOverHabitIndex(actualIndex);
   };
 
   const handleDragEndForReorder = () => {
@@ -182,8 +203,9 @@ function HabitTracker() {
     setDragOverHabitIndex(null);
   };
 
-  const handleDropForReorder = (e: React.DragEvent, dropIndex: number) => {
+  const handleDropForReorder = (e: React.DragEvent, habitId: string) => {
     e.preventDefault();
+    const dropIndex = habits.findIndex(h => h.id === habitId);
     if (draggedHabitIndex !== null && draggedHabitIndex !== dropIndex) {
       reorderHabits(draggedHabitIndex, dropIndex);
     }
@@ -192,11 +214,12 @@ function HabitTracker() {
   };
 
   // Touch-based drag and drop handlers for mobile
-  const handleTouchStartForReorder = (e: React.TouchEvent, index: number) => {
+  const handleTouchStartForReorder = (e: React.TouchEvent, habitId: string) => {
+    const actualIndex = habits.findIndex(h => h.id === habitId);
     // Only start drag if habit is selected
-    if (selectedListHabit?.id !== habits[index].id) return;
+    if (selectedListHabit?.id !== habitId) return;
 
-    setDraggedHabitIndex(index);
+    setDraggedHabitIndex(actualIndex);
     setIsDraggingHabit(true);
 
     // Stop event propagation to prevent conflicts with other touch handlers
@@ -209,15 +232,18 @@ function HabitTracker() {
     const touch = e.touches[0];
 
     // Calculate which habit we're hovering over
-    const habitElements = document.querySelectorAll('[data-habit-index]');
+    const habitElements = document.querySelectorAll('[data-habit-id]');
     let newDragOverIndex = draggedHabitIndex;
 
     for (let i = 0; i < habitElements.length; i++) {
       const element = habitElements[i] as HTMLElement;
       const rect = element.getBoundingClientRect();
       if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
-        newDragOverIndex = parseInt(element.getAttribute('data-habit-index') || '0');
-        break;
+        const habitId = element.getAttribute('data-habit-id');
+        if (habitId) {
+          newDragOverIndex = habits.findIndex(h => h.id === habitId);
+          break;
+        }
       }
     }
 
@@ -247,6 +273,9 @@ function HabitTracker() {
               <Button variant="ghost" onClick={handleEditHabit}>
                 <EditIcon />
               </Button>
+              <Button variant="ghost" onClick={handleArchiveHabit}>
+                {selectedListHabit.isArchived ? <ArchiveRestoreIcon /> : <ArchiveIcon />}
+              </Button>
               <Button variant="ghost" onClick={handleDeleteHabit}>
                 <TrashIcon />
               </Button>
@@ -257,6 +286,12 @@ function HabitTracker() {
           ) : (
             <>
               <Button onClick={handleCreateHabit}><PlusIcon /></Button>
+              <Button
+                variant={showArchivedHabits ? "default" : "ghost"}
+                onClick={() => setShowArchivedHabits(!showArchivedHabits)}
+              >
+                <ArchiveIcon />
+              </Button>
               <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
                 <Settings2Icon />
               </Button>
@@ -266,6 +301,13 @@ function HabitTracker() {
       </header>
 
       <Settings open={settingsOpen} onClose={(value) => setSettingsOpen(value)} />
+
+      {/* Archive status indicator */}
+      {showArchivedHabits && (
+        <div className="mb-4 p-2 bg-yellow-100 dark:bg-yellow-900 rounded-md text-sm text-yellow-800 dark:text-yellow-200">
+          Showing archived habits
+        </div>
+      )}
 
       {/* Headers */}
       <div className="flex flex-row gap-2 border-b pb-2 select-none">
@@ -296,29 +338,30 @@ function HabitTracker() {
       </div>
       {/* Habit List */}
       <div>
-        {habits.map((habit, index) => {
+        {visibleHabits.map((habit) => {
+          const actualIndex = habits.findIndex(h => h.id === habit.id);
           const isSelected = selectedListHabit?.id === habit.id;
           let wrapperClasses = 'border-slate-500 dark:border-slate-400'
-          if (dragOverHabitIndex === index && draggedHabitIndex !== index) {
-            if ((draggedHabitIndex ?? 0) >= index || index === 0) {
+          if (dragOverHabitIndex === actualIndex && draggedHabitIndex !== actualIndex) {
+            if ((draggedHabitIndex ?? 0) >= actualIndex || actualIndex === 0) {
               wrapperClasses += ' border-t-2';
             } else {
               wrapperClasses += ' border-b-2';
             }
           }
-          if (draggedHabitIndex === index) {
+          if (draggedHabitIndex === actualIndex) {
             wrapperClasses += ' opacity-50';
           }
           return (
             <div
               key={habit.id}
-              data-habit-index={index}
+              data-habit-id={habit.id}
               draggable={isSelected}
-              onDragStart={(e) => handleDragStartForReorder(e, index)}
-              onDragOver={(e) => handleDragOverForReorder(e, index)}
+              onDragStart={(e) => handleDragStartForReorder(e, habit.id)}
+              onDragOver={(e) => handleDragOverForReorder(e, habit.id)}
               onDragEnd={handleDragEndForReorder}
-              onDrop={(e) => handleDropForReorder(e, index)}
-              onTouchStart={(e) => handleTouchStartForReorder(e, index)}
+              onDrop={(e) => handleDropForReorder(e, habit.id)}
+              onTouchStart={(e) => handleTouchStartForReorder(e, habit.id)}
               className={wrapperClasses}
               style={{ touchAction: isSelected ? 'none' : 'auto' }} // Prevent touch scrolling when reordering
             >
