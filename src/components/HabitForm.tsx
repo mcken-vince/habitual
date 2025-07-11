@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Habit } from "@/types";
+import { Habit } from "@/types/habit";
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { ColorSelect } from "./ColorSelect";
 import { FrequencyDialog } from "./FrequencyDialog";
@@ -14,18 +14,30 @@ type PartialHabit = Partial<Habit> & {
 };
 
 interface HabitFormProps {
-  initialHabit?: PartialHabit
+  initialHabit?: Habit;
   onSave: (habit: PartialHabit) => void;
 }
 
 type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
 
-export const HabitForm = forwardRef(({
+export const HabitForm = forwardRef<{ save: () => void }, HabitFormProps>(({
   initialHabit,
   onSave,
-}: HabitFormProps, ref) => {
+}, ref) => {
+  const [habitType, setHabitType] = useState<"boolean" | "measurable" | null>(
+    initialHabit?.type || null
+  );
   const [habit, setHabit] = useState<PartialHabit>(
-    initialHabit || { name: "", description: "", type: "boolean", target: 1, unit: "", frequencyDays: undefined, color: "#FF0000" }
+    initialHabit || { 
+      name: "", 
+      description: "", 
+      type: "boolean", 
+      target: 1, 
+      unit: "", 
+      frequencyDays: undefined, 
+      color: "#FF0000",
+      isArchived: false,
+    }
   );
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -78,9 +90,20 @@ export const HabitForm = forwardRef(({
       ...prev,
       frequencyDays,
       target,
-      frequencyType: type,
     }));
   }
+
+  const handleTypeSelection = (type: "boolean" | "measurable") => {
+    setHabitType(type);
+    setHabit((prev) => ({
+      ...prev,
+      type,
+      // Reset type-specific fields when changing type
+      target: type === "boolean" ? 1 : prev.target,
+      unit: type === "boolean" ? "" : prev.unit,
+      frequencyDays: undefined,
+    }));
+  };
 
   const validate = () => {
     const newErrors: { [key: string]: string } = {};
@@ -104,6 +127,43 @@ export const HabitForm = forwardRef(({
     }
   };
 
+  // If no type is selected and this is a new habit, show type selection
+  if (!habitType && !initialHabit) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-medium mb-4">What type of habit would you like to create?</h3>
+          <div className="space-y-3">
+            <Button
+              variant="outline"
+              className="w-full h-auto p-4 text-left"
+              onClick={() => handleTypeSelection("boolean")}
+            >
+              <div>
+                <div className="font-medium">Yes/No Habit</div>
+                <div className="text-sm text-muted-foreground">
+                  Track completion (e.g., "Did I exercise today?")
+                </div>
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-auto p-4 text-left"
+              onClick={() => handleTypeSelection("measurable")}
+            >
+              <div>
+                <div className="font-medium">Measurable Habit</div>
+                <div className="text-sm text-muted-foreground">
+                  Track quantities (e.g., "How many km did I run?")
+                </div>
+              </div>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div>
@@ -123,21 +183,16 @@ export const HabitForm = forwardRef(({
           placeholder="Habit description"
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Type</label>
-        <Select
-          value={habit.type}
-          onValueChange={(value) => setHabit((prev) => ({ ...prev, type: value as Habit["type"] }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select habit type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="boolean">Yes/No</SelectItem>
-            <SelectItem value="measurable">Measurable</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      
+      {/* Show type as read-only when editing */}
+      {initialHabit && (
+        <div>
+          <label className="block text-sm font-medium mb-1">Type</label>
+          <div className="px-3 py-2 border rounded-md bg-muted text-muted-foreground">
+            {habit.type === "boolean" ? "Yes/No" : "Measurable"}
+          </div>
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium mb-1">Color</label>
@@ -236,3 +291,5 @@ export const HabitForm = forwardRef(({
     </div>
   );
 });
+
+HabitForm.displayName = "HabitForm";

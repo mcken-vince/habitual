@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { HabitForm } from "./HabitForm";
 import { useRef } from "react";
-import { Habit } from "@/types";
+import { Habit } from "@/types/habit";
 import { useHabits } from "@/hooks/useHabits";
 
 interface HabitFormSheetProps {
@@ -14,7 +14,7 @@ interface HabitFormSheetProps {
 }
 
 export const HabitFormSheet = ({ open, onClose, onSave, initialHabit }: HabitFormSheetProps) => {
-  const { addHabit, updateHabit } = useHabits();
+  const { addHabit, updateHabit, habits } = useHabits();
   const habitFormRef = useRef<{ save: () => void }>(null);
   return (
     <Sheet open={open} onOpenChange={() => onClose()} >
@@ -58,6 +58,8 @@ export const HabitFormSheet = ({ open, onClose, onSave, initialHabit }: HabitFor
                 ...habit,
                 history: {},
                 createdAt: new Date().toISOString(),
+                order: habits.length + 1,
+                isArchived: false,
               });
             }
             onClose();
