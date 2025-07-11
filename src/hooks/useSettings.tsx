@@ -4,6 +4,8 @@ export interface Settings {
   theme?: "light" | "dark";
   notificationsEnabled?: boolean;
   startDayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, etc.
+  hideArchivedHabits?: boolean;
+  hideCompletedHabits?: boolean;
 }
 
 interface SettingsContextType {
@@ -16,6 +18,8 @@ const defaultSettings: Settings = {
   theme: "light",
   notificationsEnabled: true,
   startDayOfWeek: 0,
+  hideArchivedHabits: true,
+  hideCompletedHabits: false,
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
