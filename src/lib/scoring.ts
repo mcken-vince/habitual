@@ -1,20 +1,21 @@
 import { Habit } from "@/types";
+import { toDateStringLocal } from "./dates";
 
-export function calculateHabitScore(habit: Habit): number {
+export function calculateHabitScore(habit: Habit, asOfDate?: Date): number {
   const { type, target, frequencyDays, history } = habit;
 
   const windowDays = frequencyDays || 7;
   const scoringWindow = Math.max(windowDays * 12, 120);
-  const today = new Date();
+  const referenceDate = asOfDate || new Date();
   let weightedSum = 0;
   let totalWeight = 0;
 
   const alpha = 0.07;
 
   for (let i = 0; i < scoringWindow; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
-    const dateStr = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    const date = new Date(referenceDate);
+    date.setDate(referenceDate.getDate() - i);
+    const dateStr = toDateStringLocal(date);
 
     const weight = alpha * Math.pow(1 - alpha, i);
     totalWeight += weight;
