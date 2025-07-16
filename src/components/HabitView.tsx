@@ -6,7 +6,7 @@ import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { calculateHabitScore } from "@/lib/scoring";
 import { UpdateHabitDialog } from "@/components/UpdateHabitDialog";
 import { OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
-import { getDatesInRange } from "@/lib/dates";
+import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 
 interface HabitViewProps {
   habit: Habit;
@@ -22,7 +22,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onEditHabit, 
 
   const scoreHistory = useMemo(() => {
     const allDates = getDatesInRange(new Date, 365, true); // Get all dates in the last year
-    return allDates.map((date, idx) => {
+    return allDates.map((dateStr, idx) => {
       // Build a partial history up to and including this date
       const partialHistory: typeof habit.history = {};
       for (let i = 0; i <= idx; i++) {
@@ -32,9 +32,10 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onEditHabit, 
       }
       // Calculate score for this day
       const habitForDay = { ...habit, history: partialHistory };
+      const date = parseDateStringLocal(dateStr);
       return {
-        date,
-        value: calculateHabitScore(habitForDay),
+        date: dateStr,
+        value: calculateHabitScore(habitForDay, date),
       };
     });
   }, [habit]);
