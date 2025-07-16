@@ -27,6 +27,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2025-01-01',
+      order: 0,
+      isArchived: false,
     };
     // Fill history for scoring window (default 120 days)
     for (let i = 0; i < 120; i++) {
@@ -47,6 +49,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // Miss every 5th day
     for (let i = 0; i < 120; i++) {
@@ -68,6 +72,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // One completion per week for 12 weeks
     for (let i = 0; i < 12; i++) {
@@ -88,6 +94,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // Miss every 3rd week
     for (let i = 0; i < 12; i++) {
@@ -109,6 +117,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     for (let i = 0; i < 120; i++) {
       const d = new Date(MOCK_TODAY);
@@ -128,6 +138,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     for (let i = 0; i < 120; i++) {
       const d = new Date(MOCK_TODAY);
@@ -149,6 +161,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // 1 per day for 12 weeks
     for (let i = 0; i < 12 * 7; i++) {
@@ -169,6 +183,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // 1 per day for 12 weeks (target is 14 per week)
     for (let i = 0; i < 12 * 7; i++) {
@@ -190,6 +206,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     expect(calculateHabitScore(habit)).toBe(0);
   });
@@ -203,6 +221,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     for (let i = 0; i < 84; i++) {
       const d = new Date(MOCK_TODAY);
@@ -222,6 +242,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     // Overachieve every day
     for (let i = 0; i < 120; i++) {
@@ -242,6 +264,8 @@ describe('calculateHabitScore', () => {
       history: {},
       color: '#fff',
       createdAt: '2024-01-01',
+      order: 0,
+      isArchived: false,
     };
     expect(calculateHabitScore(habit)).toBe(0);
   });

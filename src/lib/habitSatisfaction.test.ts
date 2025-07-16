@@ -25,6 +25,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '1',
       createdAt: '2025-06-24',
       type: 'boolean',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(true)
   })
@@ -39,6 +41,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '1',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(false)
   })
@@ -57,6 +61,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '1',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(true)
   })
@@ -75,6 +81,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '1',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(false)
   })
@@ -93,6 +101,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '2',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(true)
   })
@@ -106,6 +116,8 @@ describe('isHabitSatisfiedOnDate', () => {
       createdAt: '2025-06-24',
       type: 'boolean',
       target: 1,
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(true)
   })
@@ -120,6 +132,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '4',
       createdAt: '2025-06-24',
       type: 'boolean',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(false)
   })
@@ -138,6 +152,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '5',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(true)
   })
@@ -155,6 +171,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '6',
       createdAt: '2025-06-24',
       type: 'measurable',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(false)
   })
@@ -169,6 +187,8 @@ describe('isHabitSatisfiedOnDate', () => {
       id: '7',
       createdAt: '2025-06-24',
       type: 'boolean',
+      order: 0,
+      isArchived: false,
     }
     expect(isHabitSatisfiedOnDate(habit, '2024-06-10')).toBe(false)
   })
