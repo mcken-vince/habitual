@@ -8,9 +8,24 @@ export function useVisibleDates() {
   useEffect(() => {
     const calculateDateCount = () => {
       const width = window.innerWidth;
-      const max = Math.floor((width - 120) / 42);
+      
+      // Get the actual date cell width based on responsive breakpoints
+      let dateCellWidth: number;
+      if (width >= 1024) {
+        dateCellWidth = 56; // 3.5rem
+      } else if (width >= 640) {
+        dateCellWidth = 48; // 3rem
+      } else {
+        dateCellWidth = 40; // 2.5rem
+      }
+
+      const reservedWidth = 120 + 8 + 16;
+      const availableWidth = width - reservedWidth;
+      
       const min = 5;
+      const max = Math.floor(availableWidth / dateCellWidth);
       const count = Math.max(min, max);
+      
       setVisibleDatesCount(count);
       setVisibleDates(prev => getDatesInRange(parseDateStringLocal(prev[0]), count));
     };

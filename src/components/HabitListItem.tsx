@@ -103,7 +103,7 @@ export function HabitListItem({
           <h3 className="text-sm font-semibold my-auto leading-3.5">{habit.name}</h3>
         </div>
         <div className="grid"
-          style={{ gridTemplateColumns: `repeat(${visibleDates.length}, 1fr)` }}>
+          style={{ gridTemplateColumns: `repeat(${visibleDates.length}, var(--date-cell-width))` }}>
           {visibleDates.map((date) => (
             <HabitDateCell
               key={date}
