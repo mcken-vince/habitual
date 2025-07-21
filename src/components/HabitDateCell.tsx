@@ -14,7 +14,7 @@ export const HabitDateCell = ({ habit, date, onPress, onLongPress }: HabitDateCe
   const [isPressing, setIsPressing] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isCompleted = habit.history[date]
+  const isCompleted = habit.type === 'boolean' ? !!habit.history[date] : (habit.history[date] || 0) >= (habit.target / (habit.frequencyDays || 1));
   const isSatisfied = isHabitSatisfiedOnDate(habit, date)
   let textColor = "var(--color-gray-200)"
   let symbol = "✗"
@@ -85,7 +85,7 @@ export const HabitDateCell = ({ habit, date, onPress, onLongPress }: HabitDateCe
           </span>
         ) : (
           <div
-            style={{ color: textColor }}
+            style={{ color: textColor, opacity }}
             className="flex flex-col items-center"
           >
             <span className="text-lg font-semibold h-5">{habit.history[date] || 0}</span>
