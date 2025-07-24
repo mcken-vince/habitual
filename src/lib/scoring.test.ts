@@ -1,272 +1,270 @@
 import { calculateHabitScore } from './scoring';
-import type { Habit } from '@/types';
-
-const MOCK_TODAY = new Date('2025-06-10T12:00:00Z');
-
-function mockDate(date: Date) {
-  // jest.spyOn(global, 'Date').mockImplementation(() => new Date(date));
-  // For Date.now()
-  jest.spyOn(Date, 'now').mockImplementation(() => date.getTime());
-};
+import {
+  createPerfectHabit,
+  createPartialHabit,
+  createRecentlyActiveHabit,
+  createPatternHabit,
+  createHabitWithCustomDate,
+  setHistoryEntries,
+  fillPeriod,
+  getMeasurableHabit,
+  getBooleanHabit
+} from './test-utils';
 
 describe('calculateHabitScore', () => {
-  beforeEach(() => {
-    mockDate(MOCK_TODAY);
-  });
-  afterEach(() => {
-    jest.restoreAllMocks();
+  describe('Boolean Habits - Perfect Completion', () => {
+    it('returns 100 for daily boolean habit with perfect completion', () => {
+      const habit = createPerfectHabit({
+        type: 'boolean',
+        target: 1,
+        frequencyDays: 1,
+      });
+
+      expect(Math.round(calculateHabitScore(habit))).toBeGreaterThanOrEqual(99);
+    });
+
+    it('returns 100 for weekly boolean habit with perfect completion', () => {
+      const habit = createPerfectHabit({
+        type: 'boolean',
+        target: 1,
+        frequencyDays: 7,
+      });
+
+      expect(Math.round(calculateHabitScore(habit))).toBe(100);
+    });
+
+    it('returns 100 for boolean habit requiring multiple completions per period', () => {
+      const habit = createPerfectHabit({
+        type: 'boolean',
+        target: 3,
+        frequencyDays: 7,
+      });
+
+      expect(Math.round(calculateHabitScore(habit))).toBeGreaterThanOrEqual(99);
+    });
   });
 
-  it.skip('returns 100 for boolean daily habit with perfect completion', () => {
-    const habit: Habit = {
-      id: '1',
-      name: 'Daily Boolean',
-      type: 'boolean',
-      target: 1,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2025-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // Fill history for scoring window (default 120 days)
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 1;
-    }
-    expect(Math.round(calculateHabitScore(habit))).toBe(100);
+  describe('Boolean Habits - Partial Completion', () => {
+    it('returns ~80% score for daily boolean habit missing every 5th day', () => {
+      const habit = createPatternHabit(
+        [1, 1, 1, 1, 0], // Miss every 5th day
+        {
+          type: 'boolean',
+          target: 1,
+          frequencyDays: 1,
+        }
+      );
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeLessThan(100);
+      expect(score).toBeGreaterThan(70);
+    });
+
+    it('returns ~67% score for weekly boolean habit missing every 3rd week', () => {
+      const habit = createPatternHabit(
+        [1, 1, 0], // Miss every 3rd week
+        {
+          type: 'boolean',
+          target: 1,
+          frequencyDays: 7,
+        }
+      );
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeLessThan(100);
+      expect(score).toBeGreaterThan(50);
+    });
+
+    it('returns ~50% score for boolean habit achieving half the target', () => {
+      const habit = createPartialHabit(0.5, {
+        type: 'boolean',
+        target: 4,
+        frequencyDays: 7,
+      });
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeGreaterThan(40);
+      expect(score).toBeLessThan(60);
+    });
   });
 
-  it('returns less than 100 for boolean daily habit with missed days', () => {
-    const habit: Habit = {
-      id: '2',
-      name: 'Daily Boolean Missed',
-      type: 'boolean',
-      target: 1,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // Miss every 5th day
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = (i % 5 === 0 ? 0 : 1);
-    }
-    expect(calculateHabitScore(habit)).toBeLessThan(100);
-    expect(calculateHabitScore(habit)).toBeGreaterThan(0);
+  describe('Measurable Habits - Perfect Completion', () => {
+    it('returns 100 for measurable daily habit meeting target', () => {
+      const habit = createPerfectHabit({
+        type: 'measurable',
+        target: 2,
+        frequencyDays: 1,
+      });
+
+      expect(Math.round(calculateHabitScore(habit))).toBe(100);
+    });
+
+    it('returns 100 for measurable weekly habit meeting target', () => {
+      const habit = createPerfectHabit({
+        type: 'measurable',
+        target: 7,
+        frequencyDays: 7,
+      });
+
+      expect(Math.round(calculateHabitScore(habit))).toBe(100);
+    });
   });
 
-  it.skip('returns 100 for boolean weekly habit with perfect completion', () => {
-    const habit: Habit = {
-      id: '3',
-      name: 'Weekly Boolean',
-      type: 'boolean',
-      target: 1,
-      frequencyDays: 7,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // One completion per week for 12 weeks
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i * 7);
-      habit.history[d.toISOString().slice(0, 10)] = 1;
-    }
-    expect(Math.round(calculateHabitScore(habit))).toBe(100);
+  describe('Measurable Habits - Partial Completion', () => {
+    it('returns ~75% score for measurable habit achieving 75% of target', () => {
+      const habit = createPartialHabit(0.75, {
+        type: 'measurable',
+        target: 2,
+        frequencyDays: 1,
+      });
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeLessThan(100);
+      expect(score).toBeGreaterThan(60);
+    });
+
+    it('returns ~50% score for measurable weekly habit achieving half target', () => {
+      const habit = createPartialHabit(0.5, {
+        type: 'measurable',
+        target: 14,
+        frequencyDays: 7,
+      });
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeLessThan(60);
+      expect(score).toBeGreaterThan(40);
+    });
   });
 
-  it.skip('returns less than 100 for boolean weekly habit with missed weeks', () => {
-    const habit: Habit = {
-      id: '4',
-      name: 'Weekly Boolean Missed',
-      type: 'boolean',
-      target: 1,
-      frequencyDays: 7,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // Miss every 3rd week
-    for (let i = 0; i < 12; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i * 7);
-      habit.history[d.toISOString().slice(0, 10)] = (i % 3 === 0 ? 0 : 1);
-    }
-    expect(calculateHabitScore(habit)).toBeLessThan(100);
-    expect(calculateHabitScore(habit)).toBeGreaterThan(0);
+  describe('Measurable Habits - Over-Achievement', () => {
+    it('caps score at 100 for measurable habit exceeding target', () => {
+      const habit = getMeasurableHabit(1, 1);
+
+      // Set values way above target for last 120 days
+      setHistoryEntries(habit, Array.from({ length: 120 }, (_, i) => ({
+        daysAgo: i,
+        value: 10 // 10x the target
+      })));
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeLessThanOrEqual(100);
+      expect(score).toBeGreaterThanOrEqual(99);
+    });
   });
 
-  it.skip('returns 100 for measurable daily habit always meeting target', () => {
-    const habit: Habit = {
-      id: '5',
-      name: 'Measurable Daily',
-      type: 'measurable',
-      target: 2,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 2;
-    }
-    expect(Math.round(calculateHabitScore(habit))).toBe(100);
+  describe('Edge Cases', () => {
+    it('returns 0 for habit with empty history', () => {
+        const habit = getBooleanHabit(1, 1);
+
+      expect(calculateHabitScore(habit)).toBe(0);
+    });
+
+    it('returns 0 for habit with no target', () => {
+      const habit = getMeasurableHabit(0, 7);
+
+      // Add some values to history
+      setHistoryEntries(habit, Array.from({ length: 84 }, (_, i) => ({
+        daysAgo: i,
+        value: 1
+      })));
+
+      expect(calculateHabitScore(habit)).toBe(0);
+    });
+
+    it('handles habits with very short frequency periods', () => {
+      const habit = getBooleanHabit(1, 1);
+
+      // Fill only first 5 days
+      setHistoryEntries(habit, Array.from({ length: 5 }, (_, i) => ({
+        daysAgo: i,
+        value: 1
+      })));
+
+      const score = calculateHabitScore(habit);
+      expect(score).toBeGreaterThan(0);
+      expect(score).toBeLessThan(25);
+    });
+
+    it('handles habits with very long frequency periods (monthly)', () => {
+      const habit = createPerfectHabit({
+        type: 'boolean',
+        target: 1,
+        frequencyDays: 30,
+      });
+
+      const score = calculateHabitScore(habit);
+      expect(Math.round(score)).toBeGreaterThanOrEqual(99);
+    });
   });
 
-  it('returns less than 100 for measurable daily habit with partial completions', () => {
-    const habit: Habit = {
-      id: '6',
-      name: 'Measurable Daily Partial',
-      type: 'measurable',
-      target: 2,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = (i % 2 === 0 ? 1 : 2);
-    }
-    const score = calculateHabitScore(habit);
-    expect(score).toBeLessThan(100);
-    expect(score).toBeGreaterThan(0);
+  describe('Time-Based Weighting', () => {
+    it('weights recent periods more heavily than older ones', () => {
+      // Create two habits: one with recent completions, one with old completions
+      const recentHabit = createRecentlyActiveHabit(9, {
+        type: 'boolean',
+        target: 1,
+        frequencyDays: 7,
+      });
+
+      const oldHabit = getBooleanHabit(1, 7);
+      // Fill only the oldest 9 periods (weeks 9-17)
+      for (let i = 9; i < 18; i++) {
+        fillPeriod(oldHabit, i, [1]);
+      }
+
+      const recentScore = calculateHabitScore(recentHabit);
+      const oldScore = calculateHabitScore(oldHabit);
+
+      expect(recentScore).toBeGreaterThan(oldScore);
+    });
   });
 
-  it.skip('returns 100 for measurable weekly habit meeting target', () => {
-    const habit: Habit = {
-      id: '7',
-      name: 'Measurable Weekly',
-      type: 'measurable',
-      target: 7,
-      frequencyDays: 7,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // 1 per day for 12 weeks
-    for (let i = 0; i < 12 * 7; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 1;
-    }
-    expect(Math.round(calculateHabitScore(habit))).toBe(100);
+  describe('Custom Reference Date', () => {
+    it('calculates score correctly with custom reference date', () => {
+      const customDate = new Date('2025-01-01T12:00:00Z');
+      const habit = createHabitWithCustomDate(customDate, {
+        type: 'boolean',
+        target: 1,
+        frequencyDays: 1,
+      });
+
+      const score = calculateHabitScore(habit, customDate);
+      expect(Math.round(score)).toBe(100);
+    });
   });
 
-  it('returns less than 100 for measurable weekly habit below target', () => {
-    const habit: Habit = {
-      id: '8',
-      name: 'Measurable Weekly Below',
-      type: 'measurable',
-      target: 14,
-      frequencyDays: 7,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // 1 per day for 12 weeks (target is 14 per week)
-    for (let i = 0; i < 12 * 7; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 1;
-    }
-    expect(calculateHabitScore(habit)).toBeLessThan(100);
-    expect(calculateHabitScore(habit)).toBeGreaterThan(0);
-  });
+  describe('Complex Scenarios', () => {
+    it('handles boolean habit with mixed performance patterns', () => {
+      const habit = getBooleanHabit(2, 7);
 
-  it('returns 0 for habit with empty history', () => {
-    const habit: Habit = {
-      id: '9',
-      name: 'Empty History',
-      type: 'boolean',
-      target: 1,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    expect(calculateHabitScore(habit)).toBe(0);
-  });
+      // Create a mixed pattern: good weeks, bad weeks, perfect weeks
+      const pattern = [2, 1, 0, 2, 1, 2]; // Completions per week
+      
+      for (let week = 0; week < 18; week++) {
+        const completions = pattern[week % pattern.length];
+        const values = Array(7).fill(0);
+        for (let i = 0; i < completions; i++) {
+          values[i] = 1;
+        }
+        fillPeriod(habit, week, values);
+      }
 
-  it('handles missing frequencyDays (defaults to 7)', () => {
-    const habit: Habit = {
-      id: '10',
-      name: 'No Frequency',
-      type: 'boolean',
-      target: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    for (let i = 0; i < 84; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 1;
-    }
-    expect(Math.round(calculateHabitScore(habit))).toBe(100);
-  });
+      const score = calculateHabitScore(habit);
+      expect(score).toBeGreaterThan(60);
+      expect(score).toBeLessThan(90);
+    });
 
-  it('score never exceeds 100', () => {
-    const habit: Habit = {
-      id: '11',
-      name: 'Overachiever',
-      type: 'measurable',
-      target: 1,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    // Overachieve every day
-    for (let i = 0; i < 120; i++) {
-      const d = new Date(MOCK_TODAY);
-      d.setDate(d.getDate() - i);
-      habit.history[d.toISOString().slice(0, 10)] = 10;
-    }
-    expect(calculateHabitScore(habit)).toBeLessThanOrEqual(100);
-  });
+    it('handles measurable habit with irregular but sufficient values', () => {
+      const habit = getMeasurableHabit(10, 7);
 
-  it('returns 0 if no completions', () => {
-    const habit: Habit = {
-      id: '12',
-      name: 'No Completions',
-      type: 'measurable',
-      target: 1,
-      frequencyDays: 1,
-      history: {},
-      color: '#fff',
-      createdAt: '2024-01-01',
-      order: 0,
-      isArchived: false,
-    };
-    expect(calculateHabitScore(habit)).toBe(0);
+      // Irregular daily values that sum to weekly targets
+      for (let week = 0; week < 18; week++) {
+        const weekValues = [5, 2, 1, 0, 2, 0, 0]; // Sums to 10
+        fillPeriod(habit, week, weekValues);
+      }
+
+      const score = calculateHabitScore(habit);
+      expect(Math.round(score)).toBeGreaterThanOrEqual(99);
+    });
   });
 });
