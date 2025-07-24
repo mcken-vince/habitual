@@ -3,8 +3,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-
-type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
+import { type FrequencyType } from "@/lib/habitFormHelpers";
 
 interface FrequencyDialogProps {
   open: boolean;
