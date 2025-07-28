@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSettings } from "@/hooks/useSettings";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, EditIcon, CheckIcon } from "lucide-react";
-import { extractAlpha, getColorIntensity, getDatesInYear, getMonthLabelForWeek, getYearRange, groupDatesByWeek, padDatesToWeekStart } from "@/lib/calendarHelpers";
+import { extractAlpha, getColorIntensity, getDatesInYear, getMonthLabelForWeek, getYearRange, groupDatesByWeek, padDatesToWeekStart } from "./helpers";
 
 interface CalendarWidgetProps {
   habit: Habit;

@@ -1,5 +1,5 @@
-import { toDateStringLocal, parseDateStringLocal, getDatesInRange } from "./dates";
-import { addAlpha as defaultAddAlpha } from "./color";
+import { toDateStringLocal, parseDateStringLocal, getDatesInRange } from "@/lib/dates";
+import { addAlpha as defaultAddAlpha } from "@/lib/color";
 
 /**
  * Pads the beginning of a date array with dates to ensure the first date

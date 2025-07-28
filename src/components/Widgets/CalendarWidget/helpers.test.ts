@@ -6,9 +6,9 @@ import {
   getMonthLabelForWeek,
   getYearRange,
   extractAlpha
-} from './calendarHelpers';
+} from './helpers';
 
-describe('calendarHelpers', () => {
+describe('CalendarWidget Helpers', () => {
   describe('padDatesToWeekStart', () => {
     it('returns empty array when input is empty', () => {
       expect(padDatesToWeekStart([], 0)).toEqual([]);
