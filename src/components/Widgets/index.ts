@@ -1,3 +1,4 @@
+export * from './HabitInfoCard';
 export * from './OverviewWidget';
 export * from './TargetsWidget';
 export * from './ScoreWidget';
