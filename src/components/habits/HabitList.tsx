@@ -1,6 +1,6 @@
 import { Habit } from "@/types";
-import { HabitListItem } from "@/components/HabitListItem";
-import { HabitListHeader } from "@/components/HabitListHeader";
+import { HabitListItem } from "./HabitListItem";
+import { HabitListHeader } from "./HabitListHeader";
 import { useDragAndDrop } from "@/hooks/useDragAndDrop";
 import { useDateScrolling } from "@/hooks/useDateScrolling";
 import { useHabits } from "@/hooks/useHabits";

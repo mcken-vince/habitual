@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Habit } from "@/types"
-import { MiniBar } from "@/components/MiniBar"
+import { MiniBar } from "@/components/charts"
 import { parseDateStringLocal } from "@/lib/dates"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useSettings } from "@/hooks/useSettings"

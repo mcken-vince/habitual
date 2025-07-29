@@ -1,7 +1,7 @@
 import { ArrowLeftIcon, CheckIcon } from "lucide-react";
-import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
-import { HabitForm } from "./HabitForm";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { HabitForm } from ".";
 import { useRef } from "react";
 import { Habit } from "@/types/habit";
 import { useHabits } from "@/hooks/useHabits";

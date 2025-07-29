@@ -1,5 +1,5 @@
 import './App.css'
-import HabitTracker from './components/HabitTracker'
+import HabitTracker from './components/habits/HabitTracker'
 import { HabitsProvider } from './hooks/useHabits'
 import { SettingsProvider } from './hooks/useSettings'
 

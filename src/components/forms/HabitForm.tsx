@@ -3,11 +3,9 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Habit } from "@/types/habit";
 import { useState, forwardRef, useImperativeHandle } from "react";
-import { ColorSelect } from "./ColorSelect";
-import { FrequencyDialog } from "./FrequencyDialog";
+import { FrequencyDialog, FormField, ColorSelect } from ".";
 import { HabitTypeSelector } from "./HabitTypeSelector";
 import { type PartialHabit, getDialogFrequencyType, getFrequencySummary } from "@/lib/habitFormHelpers";
-import { FormField } from "./FormField";
 import { useHabitFormState } from "@/hooks/useHabitFormState";
 
 interface HabitFormProps {

@@ -1,5 +1,5 @@
 import { Habit } from "@/types";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { isHabitSatisfiedOnDate } from "@/lib/habitSatisfaction";
 

@@ -2,9 +2,9 @@ import { Habit } from "@/types";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, Settings2Icon, EditIcon, TrashIcon, XIcon, ArchiveIcon, ArchiveRestoreIcon, ListFilterIcon } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Label } from "./ui/label";
-import { Checkbox } from "./ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface HabitTrackerHeaderProps {
   selectedListHabit: Habit | null;

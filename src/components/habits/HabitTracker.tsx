@@ -1,11 +1,9 @@
 import { useMemo, useState } from "react";
 import { Habit } from "@/types";
 import { useHabits } from "@/hooks/useHabits";
-import { HabitView } from "@/components/HabitView";
-import { Settings } from "@/components/Settings";
-import { HabitFormSheet } from "@/components/HabitFormSheet";
-import { HabitTrackerHeader } from "@/components/HabitTrackerHeader";
-import { HabitList } from "@/components/HabitList";
+import { HabitView, HabitTrackerHeader, HabitList } from ".";
+import { Settings } from "@/components/settings";
+import { HabitFormSheet } from "@/components/forms";
 import { useHabitSelection } from "@/hooks/useHabitSelection";
 import { useHabitForm } from "@/hooks/useHabitForm";
 import { useSettings } from "@/hooks/useSettings";

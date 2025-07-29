@@ -1,4 +1,4 @@
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 export const HabitTypeSelector = ({ handleTypeSelection }: { handleTypeSelection: (type: "boolean" | "measurable") => void }) => {
   const HABIT_TYPES = [

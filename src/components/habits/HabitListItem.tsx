@@ -2,8 +2,8 @@ import { Habit } from "@/types";
 import { useState, useRef } from "react";
 import { HabitDateCell } from "./HabitDateCell";
 import { calculateHabitScore } from "@/lib/scoring";
-import { SimplePie } from "./SimplePie";
-import { UpdateHabitDialog } from "./UpdateHabitDialog";
+import { SimplePie } from "@/components/charts";
+import { UpdateHabitDialog } from "@/components/forms";
 import { GripVerticalIcon } from "lucide-react";
 
 interface HabitListItemProps {

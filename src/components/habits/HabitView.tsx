@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { calculateHabitScore } from "@/lib/scoring";
-import { UpdateHabitDialog } from "@/components/UpdateHabitDialog";
-import { HabitInfoCard, OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
+import { UpdateHabitDialog } from "@/components/forms";
+import { HabitInfoCard, OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/widgets";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 
 interface HabitViewProps {

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Habit } from "@/types";
-import { SimplePie } from "@/components/SimplePie";
+import { SimplePie } from "@/components/charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { calculateHabitScore } from "@/lib/scoring";
 import { 
