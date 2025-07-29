@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { calculateHabitScore } from "@/lib/scoring";
 import { UpdateHabitDialog } from "@/components/UpdateHabitDialog";
-import { OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
+import { HabitInfoCard, OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/Widgets";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 
 interface HabitViewProps {
@@ -68,6 +68,8 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onEditHabit, 
           </SheetTitle>
         </SheetHeader>
         <div className="space-y-4">
+          <HabitInfoCard habit={habit} />
+
           <OverviewWidget habit={habit} />
 
           <TargetsWidget habit={habit} />
