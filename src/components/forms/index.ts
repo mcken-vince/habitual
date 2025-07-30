@@ -1,4 +1,4 @@
-export * from './ColorSelect';
+export * from './ColorModal';
 export * from './FormField';
 export * from './FrequencyDialog';
 export * from './FrequencyOption';

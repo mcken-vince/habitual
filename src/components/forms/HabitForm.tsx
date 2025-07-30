@@ -3,7 +3,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import type { Habit, PartialHabit } from "@/types";
 import { useState, forwardRef, useImperativeHandle } from "react";
-import { FrequencyDialog, FormField, ColorSelect } from ".";
+import { FrequencyDialog, FormField, ColorModal } from ".";
 import { HabitTypeSelector } from "./HabitTypeSelector";
 import { getDialogFrequencyType, getFrequencySummary } from "@/lib/habitFormHelpers";
 import { useHabitFormState } from "@/hooks/useHabitFormState";
@@ -65,7 +65,7 @@ export const HabitForm = forwardRef<{ save: () => void }, HabitFormProps>(({
       )}
 
       <FormField label="Color">
-        <ColorSelect
+        <ColorModal
           color={habit.color}
           onChange={(value) =>
             updateHabit({ color: value })
