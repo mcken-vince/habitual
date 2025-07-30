@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { ArrowLeftIcon, EditIcon, TrashIcon } from "lucide-react";
 import { calculateHabitScore } from "@/lib/scoring";
 import { UpdateHabitDialog } from "@/components/forms";
-import { HabitInfoCard, OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/widgets";
+import { HabitInfoCard, OverviewWidget, TargetsWidget, ScoreWidget, HistoryWidget, CalendarWidget } from "@/components/widgets/index";
 import { getDatesInRange, parseDateStringLocal } from "@/lib/dates";
 
 interface HabitViewProps {
@@ -80,7 +80,7 @@ export const HabitView = ({ habit, isOpen, onClose, onUpdateHabit, onEditHabit, 
 
           <CalendarWidget
             habit={habit}
-            onDateClick={(date) => {
+            onDateClick={(date: string) => {
               if (habit.type === "boolean") {
                 onUpdateHabit(habit.id, {
                   ...habit,
