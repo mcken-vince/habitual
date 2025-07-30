@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "
 import { RadioGroup } from "@/components/ui/radio-group";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { type FrequencyType } from "@/lib/habitFormHelpers";
+import type { FrequencyType } from "@/types";
 import { FrequencyOption } from "./FrequencyOption";
 
 interface FrequencyDialogProps {

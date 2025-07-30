@@ -1,13 +1,4 @@
-import { Habit } from "@/types";
-
-export type FrequencyType = "everyDay" | "everyXDays" | "timesPerWeek" | "timesPerMonth" | "timesInXDays";
-
-export type PartialHabit = Partial<Habit> & {
-  name: string;
-  type: "boolean" | "measurable";
-  color: string;
-  target: number;
-};
+import type { PartialHabit } from "@/types";
 
 export const getFrequencySummary = (habit: PartialHabit) => {
   if (habit.frequencyDays === 1 && habit.target === 1) return "Every day";

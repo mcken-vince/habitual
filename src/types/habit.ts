@@ -12,3 +12,13 @@ export interface Habit {
   order: number; // Order position for sorting
   isArchived: boolean; // New field for archiving
 }
+
+/**
+ * Partial habit type used in forms and creation flows
+ */
+export type PartialHabit = Partial<Habit> & {
+  name: string;
+  type: "boolean" | "measurable";
+  color: string;
+  target: number;
+};

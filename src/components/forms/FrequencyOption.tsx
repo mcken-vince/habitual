@@ -1,4 +1,4 @@
-import { type FrequencyType } from "@/lib/habitFormHelpers";
+import type { FrequencyType } from "@/types";
 import { RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { useEffect, useMemo, useState } from "react";

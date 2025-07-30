@@ -1,5 +1,4 @@
-import { FrequencyType, PartialHabit } from "@/lib/habitFormHelpers";
-import { Habit } from "@/types";
+import type { Habit, PartialHabit, FrequencyType } from "@/types";
 import { useState } from "react";
 
 export const useHabitFormState = (onSave: (habit: PartialHabit) => void, initialHabit?: Habit) => {
