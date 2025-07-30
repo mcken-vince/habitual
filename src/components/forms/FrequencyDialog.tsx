@@ -1,16 +1,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { RadioGroup } from "@/components/ui/radio-group";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { type FrequencyType } from "@/lib/habitFormHelpers";
 import { FrequencyOption } from "./FrequencyOption";
 
 interface FrequencyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  initialFrequencyType: FrequencyType;
-  initialFrequencyDays: number;
+  initialType: FrequencyType;
+  initialDays: number;
   initialTarget: number;
   onSave: (type: FrequencyType, days: number, times: number) => void;
 }
@@ -18,68 +17,49 @@ interface FrequencyDialogProps {
 export function FrequencyDialog({
   open,
   onOpenChange,
-  initialFrequencyType,
-  initialFrequencyDays,
+  initialType,
+  initialDays,
   initialTarget,
   onSave,
 }: FrequencyDialogProps) {
-  const [frequencyType, setFrequencyType] = useState<FrequencyType>(initialFrequencyType);
-  const [frequencyDays, setFrequencyDays] = useState<number>(initialFrequencyDays);
+  const [type, setType] = useState<FrequencyType>(initialType);
+  const [days, setDays] = useState<number>(initialDays);
   const [target, setTarget] = useState<number>(initialTarget);
+
+  // Update defaults based on current initial values
+  const optionDefaults = useMemo(() => ({
+    everyXDays: initialType === 'everyXDays' ? initialDays : 2,
+    timesPerWeek: initialType === 'timesPerWeek' ? initialTarget : 3,
+    timesPerMonth: initialType === 'timesPerMonth' ? initialTarget : 10,
+    timesInXDays: {
+      days: initialType === 'timesInXDays' ? initialDays : 7,
+      times: initialType === 'timesInXDays' ? initialTarget : 3,
+    }
+  }), [initialType, initialDays, initialTarget]);
 
   // Reset dialog state when opened
   useEffect(() => {
     if (open) {
-      setFrequencyType(initialFrequencyType);
-      setFrequencyDays(initialFrequencyDays);
+      setType(initialType);
+      setDays(initialDays);
       setTarget(initialTarget);
     }
-  }, [open, initialFrequencyType, initialFrequencyDays, initialTarget]);
+  }, [open, initialType, initialDays, initialTarget]);
 
   const handleFrequencyTypeChange = useCallback((type: FrequencyType) => {
-    setFrequencyType(type);
-    // Set sensible defaults when switching frequency types
-    switch (type) {
-      case "everyDay":
-        setFrequencyDays(1);
-        setTarget(1);
-        break;
-      case "everyXDays":
-        if (frequencyDays <= 1) setFrequencyDays(2);
-        setTarget(1);
-        break;
-      case "timesPerWeek":
-        setFrequencyDays(7);
-        if (target > 7) setTarget(7);
-        break;
-      case "timesPerMonth":
-        setFrequencyDays(30);
-        if (target > 30) setTarget(Math.min(target, 30));
-        break;
-      case "timesInXDays":
-        if (frequencyDays <= 1) setFrequencyDays(7);
-        if (target < 1) setTarget(1);
-        break;
-    }
-  }, [frequencyDays, target]);
+    setType(type);
+  }, []);
 
-  const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>, type: 'frequencyDays' | 'target') => {
-    const value = parseInt(event.target.value, 10);
-    if (!isNaN(value)) {
-      if (type === 'frequencyDays') {
-        setFrequencyDays(value);
-      } else {
-        setTarget(value);
-      }
-    }
+  const handleOptionUpdate = useCallback((days: number, times: number) => {
+    setDays(days);
+    setTarget(times);
   }, []);
 
   const handleSave = useCallback(() => {
-    onSave(frequencyType, frequencyDays, target);
+    onSave(type, days, target);
     onOpenChange(false);
-  }, [frequencyType, frequencyDays, target, onSave, onOpenChange]);
+  }, [type, days, target, onSave, onOpenChange]);
 
-  const inputClassName = "inline w-14 mx-2";
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -88,87 +68,44 @@ export function FrequencyDialog({
         </DialogHeader>
 
         <RadioGroup
-          value={frequencyType}
+          value={type}
           onValueChange={handleFrequencyTypeChange}
         >
           <FrequencyOption
             id="everyDay"
+            isSelected={type === "everyDay"}
             onSelect={handleFrequencyTypeChange}
-          >
-            Every day
-          </FrequencyOption>
-
+            onUpdate={handleOptionUpdate}
+          />
           <FrequencyOption
             id="everyXDays"
+            isSelected={type === "everyXDays"}
             onSelect={handleFrequencyTypeChange}
-          >
-            Every
-            <Input
-              type="number"
-              className={inputClassName}
-              value={frequencyType === "everyXDays" ? frequencyDays : 2}
-              onChange={(e) => handleInputChange(e, 'frequencyDays')}
-              disabled={frequencyType !== "everyXDays"}
-              min={2}
-            />
-            days
-          </FrequencyOption>
-
+            onUpdate={handleOptionUpdate}
+            initialDays={optionDefaults.everyXDays}
+          />
           <FrequencyOption
             id="timesPerWeek"
             onSelect={handleFrequencyTypeChange}
-          >
-            <Input
-              type="number"
-              className={inputClassName}
-              value={frequencyType === "timesPerWeek" ? target : 1}
-              onChange={(e) => handleInputChange(e, 'target')}
-              disabled={frequencyType !== "timesPerWeek"}
-              min={1}
-              max={7}
-            />
-            times per week
-          </FrequencyOption>
-
+            isSelected={type === "timesPerWeek"}
+            onUpdate={handleOptionUpdate}
+            initialTimes={optionDefaults.timesPerWeek}
+          />
           <FrequencyOption
             id="timesPerMonth"
             onSelect={handleFrequencyTypeChange}
-          >
-            <Input
-              type="number"
-              className={inputClassName}
-              value={frequencyType === "timesPerMonth" ? target : 1}
-              onChange={(e) => handleInputChange(e, 'target')}
-              disabled={frequencyType !== "timesPerMonth"}
-              min={1}
-              max={30}
-            />
-            times per month
-          </FrequencyOption>
-
+            isSelected={type === "timesPerMonth"}
+            onUpdate={handleOptionUpdate}
+            initialTimes={optionDefaults.timesPerMonth}
+          />
           <FrequencyOption
             id="timesInXDays"
             onSelect={handleFrequencyTypeChange}
-          >
-            <Input
-              type="number"
-              className={inputClassName}
-              value={frequencyType === "timesInXDays" ? target : 1}
-              onChange={(e) => handleInputChange(e, 'target')}
-              disabled={frequencyType !== "timesInXDays"}
-              min={1}
-            />
-            times in
-            <Input
-              type="number"
-              className={inputClassName}
-              value={frequencyType === "timesInXDays" ? frequencyDays : 7}
-              onChange={(e) => handleInputChange(e, 'frequencyDays')}
-              disabled={frequencyType !== "timesInXDays"}
-              min={1}
-            />
-            days
-          </FrequencyOption>
+            isSelected={type === "timesInXDays"}
+            onUpdate={handleOptionUpdate}
+            initialDays={optionDefaults.timesInXDays.days}
+            initialTimes={optionDefaults.timesInXDays.times}
+          />
         </RadioGroup>
 
         <DialogFooter className="mt-4 flex justify-end gap-2">

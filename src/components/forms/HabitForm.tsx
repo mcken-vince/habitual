@@ -82,8 +82,8 @@ export const HabitForm = forwardRef<{ save: () => void }, HabitFormProps>(({
           <FrequencyDialog
             open={frequencyDialogOpen}
             onOpenChange={setFrequencyDialogOpen}
-            initialFrequencyType={getDialogFrequencyType(habit)}
-            initialFrequencyDays={habit.frequencyDays || 7}
+            initialType={getDialogFrequencyType(habit)}
+            initialDays={habit.frequencyDays || 7}
             initialTarget={habit.target || 1}
             onSave={updateHabitFrequency}
           />
@@ -112,9 +112,9 @@ export const HabitForm = forwardRef<{ save: () => void }, HabitFormProps>(({
           <FormField label="Frequency" error={errors.frequencyDays}>
             <Select
               value={
-                habit.frequencyDays === 1 ? "daily" : 
-                habit.frequencyDays === 7 ? "weekly" : 
-                habit.frequencyDays === 30 ? "monthly" : ""
+                habit.frequencyDays === 1 ? "daily" :
+                  habit.frequencyDays === 7 ? "weekly" :
+                    habit.frequencyDays === 30 ? "monthly" : ""
               }
               onValueChange={(value) => {
                 const frequencyMap: Record<string, number> = {
